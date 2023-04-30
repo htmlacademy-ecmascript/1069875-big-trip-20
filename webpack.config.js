@@ -1,5 +1,5 @@
 const path = require("path");
-const CopyPlugin = require('copy-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   entry: "./src/main.js",
@@ -11,9 +11,25 @@ module.exports = {
   devtool: "source-map",
   plugins: [
     new CopyPlugin({
-      patterns: [{
-        from: 'public',
-      },],
+      patterns: [
+        {
+          from: "public",
+        },
+      ],
     }),
   ],
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /(node_modules)/,
+        use: {
+          loader: "babel-core",
+          options: {
+            presets: ["@babel/preset-env"],
+          },
+        },
+      },
+    ],
+  },
 };
