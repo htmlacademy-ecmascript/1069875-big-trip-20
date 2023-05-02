@@ -1,6 +1,6 @@
 import FiltersView from '../view/filters-view.js';
 import FiltersItemView from '../view/filters-item-view.js';
-import { render, RenderPosition } from "../render.js";
+import { render, RenderPosition } from '../render.js';
 
 export default class FiltersPresenter {
   filtersComponent = new FiltersView();
