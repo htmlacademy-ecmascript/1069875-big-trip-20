@@ -1,12 +1,12 @@
 import { createElement } from '../render.js';
 
-function createFormDetailsTemplate() {
+function createFormAdditionTemplate() {
   return '<section class="event__details"></section>';
 }
 
-export default class FormDetailsView {
+export default class FormAdditionView {
   getTemplate() {
-    return createFormDetailsTemplate();
+    return createFormAdditionTemplate();
   }
 
   getElement() {

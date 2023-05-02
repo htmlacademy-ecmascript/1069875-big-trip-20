@@ -1,12 +1,12 @@
 import { createElement } from '../render.js';
 
-function createOffersListTemplate() {
+function createOffersTemplate() {
   return '<div class="event__available-offers"></div>';
 }
 
-export default class OffersListView {
+export default class OffersView {
   getTemplate() {
-    return createOffersListTemplate();
+    return createOffersTemplate();
   }
 
   getElement() {

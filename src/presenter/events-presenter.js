@@ -1,6 +1,6 @@
 import EventsListView from '../view/events-list-view.js';
 import EventView from '../view/event-view.js';
-import FormPresenter from '../presenter/form-presenter.js';
+import FormPresenter from './form-presenter.js';
 import { render } from '../render.js';
 
 export default class EventsPresenter {
