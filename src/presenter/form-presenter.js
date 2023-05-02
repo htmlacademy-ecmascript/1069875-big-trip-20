@@ -1,5 +1,6 @@
 import FormView from '../view/form-view.js';
 import FormMainView from '../view/form-main-view.js';
+import TypeFieldPresenter from './type-field-presenter.js';
 import FormAdditionView from '../view/form-addition-view.js';
 import FormSectionView from '../view/form-section-view.js';
 import OffersPresenter from './offers-presenter.js';
@@ -9,6 +10,7 @@ import { render } from '../render.js';
 export default class FormPresenter {
   formComponent = new FormView();
   formMainComponent = new FormMainView();
+  typeFieldComponent = new TypeFieldPresenter({ container: this.formMainComponent.getElement() });
   formAdditionComponent = new FormAdditionView();
   offersSectionComponent = new FormSectionView();
   offersComponent = new OffersPresenter({ container: this.offersSectionComponent.getElement() });
@@ -21,6 +23,7 @@ export default class FormPresenter {
   init() {
     render(this.formComponent, this.container);
     render(this.formMainComponent, this.formComponent.getElement());
+    this.typeFieldComponent.init();
     render(this.formAdditionComponent, this.formComponent.getElement());
     render(
       this.offersSectionComponent,
