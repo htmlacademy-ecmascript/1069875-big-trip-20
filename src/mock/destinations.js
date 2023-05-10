@@ -54,7 +54,7 @@ function createMockDestination(title) {
 }
 
 function getMockDestinations() {
-  return DESTINATIONS_TITLES.forEach((title) => createMockDestination(title));
+  return DESTINATIONS_TITLES.map((title) => createMockDestination(title));
 }
 
 export { getMockDestinations, DESTINATIONS_TITLES };

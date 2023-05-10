@@ -43,7 +43,7 @@ function createMockOffers() {
 }
 
 function createMockOffersByTypes() {
-  return EVENTS_TYPES.forEach((title) => ({
+  return EVENTS_TYPES.map((title) => ({
     type: title,
     offers: createMockOffers(),
   }));
