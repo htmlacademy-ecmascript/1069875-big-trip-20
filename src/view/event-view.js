@@ -14,7 +14,6 @@ function createOfferTemplate({ title, price }) {
 
 function createEventTemplate(event, typeOffers) {
   const { type, destination, basePrice, isFavorite, offers } = event;
-  console.log(offers);
 
   const offersItems = getChosenOffers(typeOffers, offers).map((offer) => createOfferTemplate(offer)).join('');
 
