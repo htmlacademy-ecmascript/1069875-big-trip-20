@@ -7,19 +7,23 @@ export default class EventsPresenter {
   eventsListComponent = new EventsListView();
   formComponent = new FormPresenter({ container: this.eventsListComponent.getElement() });
 
-  constructor({ container, eventsModel }) {
+  constructor({ container, eventsModel, offersModel }) {
     this.container = container;
     this.eventsModel = eventsModel;
+    this.offersModel = offersModel;
   }
 
   init() {
     this.events = [...this.eventsModel.getEvents()];
+    this.offers = this.offersModel.getOffers();
 
     this.formComponent.init();
     render(this.eventsListComponent, this.container);
 
     for (let i = 0; i < this.events.length; i++) {
-      render(new EventView({ event: this.events[i] }), this.eventsListComponent.getElement());
+      const event = this.events[i];
+      const typeOffers = this.offers.get(event.type);
+      render(new EventView({ event: event, typeOffers: typeOffers }), this.eventsListComponent.getElement());
     }
   }
 }

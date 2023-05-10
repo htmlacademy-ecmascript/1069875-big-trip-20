@@ -1,4 +1,5 @@
 import EventsModel from '../model/events-model.js';
+import OffersModel from '../model/offers-model.js';
 import TripInfoView from '../view/trip-info-view.js';
 import FiltersPresenter from './filters-presenter.js';
 import SortingPresenter from './sorting-presenter.js';
@@ -7,6 +8,7 @@ import { render, RenderPosition } from '../render.js';
 
 export default class AppPresenter {
   eventsModel = new EventsModel();
+  offersModel = new OffersModel();
 
   constructor({ tripMainElement, filtersElement, siteMainElement }) {
     this.tripMainElement = tripMainElement;
@@ -24,6 +26,7 @@ export default class AppPresenter {
     this.eventsComponent = new EventsPresenter({
       container: this.siteMainElement,
       eventsModel: this.eventsModel,
+      offersModel: this.offersModel,
     });
     render(new TripInfoView(), this.tripMainElement, RenderPosition.AFTERBEGIN);
     this.filtersComponent.init();

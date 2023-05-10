@@ -1,7 +1,22 @@
 import { createElement } from '../render.js';
 
-function createEventTemplate(event) {
-  const { type, destination, basePrice, isFavorite } = event;
+function getChosenOffers(typeOffers, offersIds) {
+  return offersIds.map((offerId) => typeOffers.get(offerId));
+}
+
+function createOfferTemplate({ title, price }) {
+  return `<li class="event__offer">
+            <span class="event__offer-title">${title}</span>
+            &plus;&euro;&nbsp;
+            <span class="event__offer-price">${price}</span>
+          </li>`;
+}
+
+function createEventTemplate(event, typeOffers) {
+  const { type, destination, basePrice, isFavorite, offers } = event;
+  console.log(offers);
+
+  const offersItems = getChosenOffers(typeOffers, offers).map((offer) => createOfferTemplate(offer)).join('');
 
   const favoriteClass = isFavorite ? 'event__favorite-btn--active' : '';
 
@@ -25,11 +40,7 @@ function createEventTemplate(event) {
                 </p>
                 <h4 class="visually-hidden">Offers:</h4>
                 <ul class="event__selected-offers">
-                  <li class="event__offer">
-                    <span class="event__offer-title">Order Uber</span>
-                    &plus;&euro;&nbsp;
-                    <span class="event__offer-price">20</span>
-                  </li>
+                  ${offersItems}
                 </ul>
                 <button class="event__favorite-btn ${favoriteClass}" type="button">
                   <span class="visually-hidden">Add to favorite</span>
@@ -46,12 +57,13 @@ function createEventTemplate(event) {
 
 export default class EventView {
 
-  constructor({ event }) {
+  constructor({ event, typeOffers }) {
     this.event = event;
+    this.typeOffers = typeOffers;
   }
 
   getTemplate() {
-    return createEventTemplate(this.event);
+    return createEventTemplate(this.event, this.typeOffers);
   }
 
   getElement() {
