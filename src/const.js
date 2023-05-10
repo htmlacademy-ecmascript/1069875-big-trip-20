@@ -10,4 +10,8 @@ const EVENTS_TYPES = [
   'Restaurant',
 ];
 
-export { EVENTS_TYPES };
+const FILTERS_NAMES = ['everything', 'future', 'present', 'past'];
+
+const SORTING_NAMES = ['day', 'event', 'time', 'price', 'offers'];
+
+export { EVENTS_TYPES, FILTERS_NAMES, SORTING_NAMES };
