@@ -19,7 +19,7 @@ export default class EventsPresenter {
     render(this.eventsListComponent, this.container);
 
     for (let i = 0; i < this.events.length; i++) {
-      render(new EventView(this.events[i]), this.eventsListComponent.getElement());
+      render(new EventView({ event: this.events[i] }), this.eventsListComponent.getElement());
     }
   }
 }
