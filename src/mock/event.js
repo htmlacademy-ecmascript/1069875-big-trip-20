@@ -45,7 +45,7 @@ const mockEvents = [
     basePrice: 13,
     dateFrom: new Date('2023-07-02T17:20:00'),
     dateTo: new Date('2023-07-02T18:00:00'),
-    offers: [2, 4],
+    offers: [],
     isFavorite: getRandomArrayElement([true, false]),
   },
 ];

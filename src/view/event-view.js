@@ -2,8 +2,8 @@ import { DateFormats } from '../const.js';
 import { transformDate, getDuration } from '../utils.js';
 import { createElement } from '../render.js';
 
-function getChosenOffers(typeOffers, offersIds) {
-  return offersIds.map((offerId) => typeOffers.get(offerId));
+function getChosenOffers(offers, offersIds) {
+  return offersIds.map((offerId) => offers.get(offerId));
 }
 
 function createOfferTemplate({ title, price }) {
@@ -14,10 +14,19 @@ function createOfferTemplate({ title, price }) {
           </li>`;
 }
 
+function createOffersTemplate({ typeOffers, offers }) {
+  const offersItemsTemplate = getChosenOffers(typeOffers, offers)
+    .map((offer) => createOfferTemplate(offer))
+    .join('');
+
+  return `<h4 class="visually-hidden">Offers:</h4>
+          <ul class="event__selected-offers">${offersItemsTemplate}</ul>`;
+}
+
 function createEventTemplate(event, typeOffers) {
   const { type, destination, basePrice, isFavorite, offers, dateFrom, dateTo } = event;
 
-  const offersItemsTemplate = getChosenOffers(typeOffers, offers).map((offer) => createOfferTemplate(offer)).join('');
+  const offersTemplate = offers.length ? createOffersTemplate({ typeOffers: typeOffers, offers: offers }) : '';
 
   const favoriteClass = isFavorite ? 'event__favorite-btn--active' : '';
 
@@ -50,10 +59,7 @@ function createEventTemplate(event, typeOffers) {
                 <p class="event__price">
                   &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
                 </p>
-                <h4 class="visually-hidden">Offers:</h4>
-                <ul class="event__selected-offers">
-                  ${offersItemsTemplate}
-                </ul>
+                  ${offersTemplate}
                 <button class="event__favorite-btn ${favoriteClass}" type="button">
                   <span class="visually-hidden">Add to favorite</span>
                   <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
