@@ -30,4 +30,14 @@ function getDuration(timeFrom, timeTo) {
   return days + hours + minutes;
 }
 
-export { getRandomNumber, getRandomArrayElement, transformDate, getDuration };
+function startStringWithCapital(str) {
+  return str[0].toUpperCase() + str.substring(1);
+}
+
+export {
+  getRandomNumber,
+  getRandomArrayElement,
+  transformDate,
+  getDuration,
+  startStringWithCapital,
+};
