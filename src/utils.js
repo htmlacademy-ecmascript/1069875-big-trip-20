@@ -20,12 +20,12 @@ function getDuration(timeFrom, timeTo) {
   const timeDuration = dayjs.duration(dayjs(timeTo).diff(timeFrom));
 
   let days = timeDuration.days();
-  days = days ? `${days}D ` : '';
+  days = days ? `${dayjs(days).format('DD[D]')} ` : '';
 
   let hours = timeDuration.hours();
-  hours = hours || days ? `${hours}H ` : '';
+  hours = hours || days ? `${dayjs(hours).format('HH[H]')} ` : '';
 
-  const minutes = `${timeDuration.minutes()}M`;
+  const minutes = dayjs(timeDuration.minutes()).format('MM[M]');
 
   return days + hours + minutes;
 }

@@ -17,7 +17,7 @@ const mockEvents = [
     destination: getRandomArrayElement(DESTINATIONS_TITLES),
     basePrice: 130,
     dateFrom: new Date('2023-06-17T12:00:00'),
-    dateTo: new Date('2023-06-17T12:30:00'),
+    dateTo: new Date('2023-06-18T12:30:00'),
     offers: [1, 2],
     isFavorite: getRandomArrayElement([true, false]),
   },
