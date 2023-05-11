@@ -15,6 +15,7 @@ const FILTERS_NAMES = ['everything', 'future', 'present', 'past'];
 const SORTING_NAMES = ['day', 'event', 'time', 'price', 'offers'];
 
 const DateFormats = {
+  FOR_FORM: 'DD/MM/YY h:mm',
   FULL: 'YYYY-MM-DDTHH:mm',
   DAY_MACHINE: 'YYYY-MM-DD',
   DAY_HUMAN: 'D MMMM',

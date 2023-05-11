@@ -1,6 +1,6 @@
-import { EVENTS_TYPES, EMPTY_EVENT } from '../const.js';
+import { EVENTS_TYPES, EMPTY_EVENT, DateFormats } from '../const.js';
 import { createElement } from '../render.js';
-import { startStringWithCapital } from '../utils.js';
+import { startStringWithCapital, transformDate } from '../utils.js';
 
 function createTypesListItemTemplate(title) {
   return `<div class="event__type-item">
@@ -69,7 +69,7 @@ function createDataListItemTemplate(title) {
 }
 
 function createFormTemplate({ event = EMPTY_EVENT, typeOffers = [], destinations }) {
-  const { type, destination, basePrice, offers } = event;
+  const { type, destination, dateFrom, dateTo, basePrice, offers } = event;
 
   const dataListTemplate = Array.from(destinations.keys())
     .map((title) => createDataListItemTemplate(title))
@@ -114,10 +114,12 @@ function createFormTemplate({ event = EMPTY_EVENT, typeOffers = [], destinations
 
                 <div class="event__field-group  event__field-group--time">
                   <label class="visually-hidden" for="event-start-time-1">From</label>
-                  <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="18/03/19 12:25">
+                  <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time"
+                    value="${transformDate(dateFrom, DateFormats.FOR_FORM)}">
                   &mdash;
                   <label class="visually-hidden" for="event-end-time-1">To</label>
-                  <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="18/03/19 13:35">
+                  <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time"
+                    value="${transformDate(dateTo, DateFormats.FOR_FORM)}">
                 </div>
 
                 <div class="event__field-group  event__field-group--price">
