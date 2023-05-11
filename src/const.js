@@ -21,4 +21,14 @@ const DateFormats = {
   TIME: 'h:mm',
 };
 
-export { EVENTS_TYPES, FILTERS_NAMES, SORTING_NAMES, DateFormats };
+const EMPTY_EVENT = {
+  type: EVENTS_TYPES[0],
+  destination: '',
+  basePrice: 0,
+  dateFrom: new Date(),
+  dateTo: new Date(),
+  offers: [],
+  isFavorite: false,
+};
+
+export { EVENTS_TYPES, FILTERS_NAMES, SORTING_NAMES, DateFormats, EMPTY_EVENT };

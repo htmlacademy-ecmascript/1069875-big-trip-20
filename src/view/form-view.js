@@ -1,4 +1,4 @@
-import { EVENTS_TYPES } from '../const.js';
+import { EVENTS_TYPES, EMPTY_EVENT } from '../const.js';
 import { createElement } from '../render.js';
 import { startStringWithCapital } from '../utils.js';
 
@@ -68,7 +68,7 @@ function createDataListItemTemplate(title) {
   return `<option value='${title}'></option>`;
 }
 
-function createFormTemplate({ event, typeOffers, destinations }) {
+function createFormTemplate({ event = EMPTY_EVENT, typeOffers = [], destinations }) {
   const { type, destination, basePrice, offers } = event;
 
   const dataListTemplate = Array.from(destinations.keys())
@@ -79,12 +79,14 @@ function createFormTemplate({ event, typeOffers, destinations }) {
     createTypesListItemTemplate(title)
   ).join('');
 
-  const offersTemplate = typeOffers
+  const offersTemplate = typeOffers.length
     ? createOffersTemplate({ allOffers: typeOffers, selectedOffersIds: offers })
     : '';
 
   const destinationInfo = destinations.get(destination);
-  const destinationInfoTemplate = destinationInfo ? createDestinationInfoTemplate(destinationInfo) : '';
+  const destinationInfoTemplate = destinationInfo
+    ? createDestinationInfoTemplate(destinationInfo)
+    : '';
 
   return `<li class="trip-events__item">
             <form class="event event--edit" action="#" method="post">
