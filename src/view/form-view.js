@@ -75,7 +75,7 @@ function createFormTemplate({ event = EMPTY_EVENT, typeOffers = [], destinations
     .map((title) => createDataListItemTemplate(title))
     .join('');
 
-  const typesList = EVENTS_TYPES.map((title) =>
+  const typesListTemplate = EVENTS_TYPES.map((title) =>
     createTypesListItemTemplate(title)
   ).join('');
 
@@ -100,7 +100,7 @@ function createFormTemplate({ event = EMPTY_EVENT, typeOffers = [], destinations
                   <div class="event__type-list">
                     <fieldset class="event__type-group">
                       <legend class="visually-hidden">Event type</legend>
-                      ${typesList}
+                      ${typesListTemplate}
                     </fieldset>
                   </div>
                 </div>

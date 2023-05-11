@@ -17,7 +17,7 @@ function createOfferTemplate({ title, price }) {
 function createEventTemplate(event, typeOffers) {
   const { type, destination, basePrice, isFavorite, offers, dateFrom, dateTo } = event;
 
-  const offersItems = getChosenOffers(typeOffers, offers).map((offer) => createOfferTemplate(offer)).join('');
+  const offersItemsTemplate = getChosenOffers(typeOffers, offers).map((offer) => createOfferTemplate(offer)).join('');
 
   const favoriteClass = isFavorite ? 'event__favorite-btn--active' : '';
 
@@ -25,16 +25,25 @@ function createEventTemplate(event, typeOffers) {
 
   return `<li class="trip-events__item">
               <div class="event">
-                <time class="event__date" datetime="${transformDate(dateFrom, DateFormats.DAY_MACHINE)}">${transformDate(dateFrom, DateFormats.DAY_HUMAN)}</time>
+                <time class="event__date"
+                  datetime="${transformDate(dateFrom,DateFormats.DAY_MACHINE)}">
+                  ${transformDate(dateFrom, DateFormats.DAY_HUMAN)}
+                </time>
                 <div class="event__type">
                   <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
                 </div>
                 <h3 class="event__title">${type} ${destination}</h3>
                 <div class="event__schedule">
                   <p class="event__time">
-                    <time class="event__start-time" datetime="${transformDate(dateFrom, DateFormats.FULL)}">${transformDate(dateFrom, DateFormats.TIME)}</time>
+                    <time class="event__start-time"
+                      datetime="${transformDate(dateFrom, DateFormats.FULL)}">
+                      ${transformDate(dateFrom, DateFormats.TIME)}
+                    </time>
                     &mdash;
-                    <time class="event__end-time" datetime="${transformDate(dateTo, DateFormats.FULL)}">${transformDate(dateTo, DateFormats.TIME)}</time>
+                    <time class="event__end-time"
+                      datetime="${transformDate(dateTo, DateFormats.FULL)}">
+                      ${transformDate(dateTo, DateFormats.TIME)}
+                    </time>
                   </p>
                   <p class="event__duration">${duration}</p>
                 </div>
@@ -43,7 +52,7 @@ function createEventTemplate(event, typeOffers) {
                 </p>
                 <h4 class="visually-hidden">Offers:</h4>
                 <ul class="event__selected-offers">
-                  ${offersItems}
+                  ${offersItemsTemplate}
                 </ul>
                 <button class="event__favorite-btn ${favoriteClass}" type="button">
                   <span class="visually-hidden">Add to favorite</span>

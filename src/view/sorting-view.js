@@ -9,9 +9,9 @@ function createSortingItemTemplate(name) {
 }
 
 function createSortingTemplate() {
-  const sortingItems = SORTING_NAMES.map((name) => createSortingItemTemplate(name)).join('');
+  const sortingItemsTemplate = SORTING_NAMES.map((name) => createSortingItemTemplate(name)).join('');
 
-  return `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">${sortingItems}</form>`;
+  return `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">${sortingItemsTemplate}</form>`;
 }
 
 export default class SortingView {
