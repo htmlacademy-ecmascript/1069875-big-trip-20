@@ -31,9 +31,7 @@ export default class EventsPresenter {
 
     render(this.#eventsListComponent, this.#container);
 
-    for (let i = 0; i < this.#events.length; i++) {
-      this.#renderEvent(this.#events[i]);
-    }
+    this.#events.forEach((event) => this.#renderEvent(event));
   }
 
   #renderEvent(event) {
