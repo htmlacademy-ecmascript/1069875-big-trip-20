@@ -42,10 +42,15 @@ function startStringWithCapital(str) {
   return str[0].toUpperCase() + str.substring(1);
 }
 
+function isKeyEscape(evt) {
+  return evt.key === 'Escape';
+}
+
 export {
   getRandomNumber,
   getRandomArrayElement,
   transformDate,
   getDuration,
   startStringWithCapital,
+  isKeyEscape,
 };

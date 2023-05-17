@@ -3,25 +3,24 @@ import { render } from '../framework/render.js';
 
 export default class FormPresenter {
   #container = null;
-  #event = null;
-  #typeOffers = null;
-  #destinations = null;
 
   #formComponent = null;
 
-  constructor({ container, event, typeOffers, destinations }) {
+  constructor({ container, event, typeOffers, destinations, closeForm }) {
     this.#container = container;
-    this.#event = event;
-    this.#typeOffers = typeOffers;
-    this.#destinations = destinations;
+    this.#formComponent = new FormView({
+      event,
+      typeOffers,
+      destinations,
+      closeForm,
+    });
   }
 
   init() {
-    this.#formComponent = new FormView({
-      event: this.#event,
-      typeOffers: this.#typeOffers,
-      destinations: this.#destinations,
-    });
     render(this.#formComponent, this.#container);
+  }
+
+  get component() {
+    return this.#formComponent;
   }
 }

@@ -145,15 +145,23 @@ function createFormTemplate({ event = EMPTY_EVENT, typeOffers = [], destinations
 }
 
 export default class FormView extends AbstractView {
-  #event;
-  #typeOffers;
-  #destinations;
+  #event = null;
+  #typeOffers = null;
+  #destinations = null;
+  #handleCloseForm = null;
 
-  constructor({ event, typeOffers, destinations }) {
+  constructor({ event, typeOffers, destinations, closeForm }) {
     super();
     this.#event = event;
     this.#typeOffers = typeOffers;
     this.#destinations = destinations;
+    this.#handleCloseForm = closeForm;
+    this.element
+      .querySelector('form')
+      .addEventListener('submit', this.#formSubmitHandler);
+    this.element
+      .querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#editBtnClickHandler);
   }
 
   get template() {
@@ -163,4 +171,14 @@ export default class FormView extends AbstractView {
       destinations: this.#destinations,
     });
   }
+
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleCloseForm();
+  };
+
+  #editBtnClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleCloseForm();
+  };
 }
