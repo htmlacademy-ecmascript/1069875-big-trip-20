@@ -5,7 +5,7 @@ import TripInfoView from '../view/trip-info-view.js';
 import FiltersPresenter from './filters-presenter.js';
 import SortingPresenter from './sorting-presenter.js';
 import EventsPresenter from './events-presenter.js';
-import { render, RenderPosition } from '../render.js';
+import { render, RenderPosition } from '../framework/render.js';
 
 export default class AppPresenter {
   eventsModel = new EventsModel();

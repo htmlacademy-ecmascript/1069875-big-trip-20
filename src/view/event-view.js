@@ -1,6 +1,6 @@
 import { DateFormats } from '../const.js';
 import { transformDate, getDuration } from '../utils.js';
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function getChosenOffers(offers, offersIds) {
   return offersIds.map((offerId) => offers.get(offerId));
@@ -73,26 +73,17 @@ function createEventTemplate({ event, typeOffers }) {
             </li>`;
 }
 
-export default class EventView {
-
+export default class EventView extends AbstractView {
   constructor({ event, typeOffers }) {
+    super();
     this.event = event;
     this.typeOffers = typeOffers;
   }
 
-  getTemplate() {
-    return createEventTemplate({ event: this.event, typeOffers: this.typeOffers });
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createEventTemplate({
+      event: this.event,
+      typeOffers: this.typeOffers,
+    });
   }
 }

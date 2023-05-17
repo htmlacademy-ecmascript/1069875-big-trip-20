@@ -1,6 +1,6 @@
 import { EVENTS_TYPES, EMPTY_EVENT, DateFormats } from '../const.js';
-import { createElement } from '../render.js';
 import { startStringWithCapital, transformDate } from '../utils.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function createTypesListItemTemplate(title) {
   return `<div class="event__type-item">
@@ -144,30 +144,19 @@ function createFormTemplate({ event = EMPTY_EVENT, typeOffers = [], destinations
           </li>`;
 }
 
-export default class FormView {
+export default class FormView extends AbstractView {
   constructor({ event, typeOffers, destinations }) {
+    super();
     this.event = event;
     this.typeOffers = typeOffers;
     this.destinations = destinations;
   }
 
-  getTemplate() {
+  get template() {
     return createFormTemplate({
       event: this.event,
       typeOffers: this.typeOffers,
       destinations: this.destinations,
     });
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
   }
 }
