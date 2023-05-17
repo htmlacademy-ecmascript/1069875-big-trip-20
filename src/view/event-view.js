@@ -74,16 +74,19 @@ function createEventTemplate({ event, typeOffers }) {
 }
 
 export default class EventView extends AbstractView {
+  #event = null;
+  #typeOffers = null;
+
   constructor({ event, typeOffers }) {
     super();
-    this.event = event;
-    this.typeOffers = typeOffers;
+    this.#event = event;
+    this.#typeOffers = typeOffers;
   }
 
   get template() {
     return createEventTemplate({
-      event: this.event,
-      typeOffers: this.typeOffers,
+      event: this.#event,
+      typeOffers: this.#typeOffers,
     });
   }
 }

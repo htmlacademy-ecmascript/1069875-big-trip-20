@@ -145,18 +145,22 @@ function createFormTemplate({ event = EMPTY_EVENT, typeOffers = [], destinations
 }
 
 export default class FormView extends AbstractView {
+  #event;
+  #typeOffers;
+  #destinations;
+
   constructor({ event, typeOffers, destinations }) {
     super();
-    this.event = event;
-    this.typeOffers = typeOffers;
-    this.destinations = destinations;
+    this.#event = event;
+    this.#typeOffers = typeOffers;
+    this.#destinations = destinations;
   }
 
   get template() {
     return createFormTemplate({
-      event: this.event,
-      typeOffers: this.typeOffers,
-      destinations: this.destinations,
+      event: this.#event,
+      typeOffers: this.#typeOffers,
+      destinations: this.#destinations,
     });
   }
 }

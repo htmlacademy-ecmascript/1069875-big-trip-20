@@ -8,32 +8,44 @@ import EventsPresenter from './events-presenter.js';
 import { render, RenderPosition } from '../framework/render.js';
 
 export default class AppPresenter {
-  eventsModel = new EventsModel();
-  offersModel = new OffersModel();
-  destinationsModel = new DestinationsModel();
+  #tripMainElement = null;
+  #filtersElement = null;
+  #siteMainElement = null;
+
+  #filtersComponent = null;
+  #sortingComponent = null;
+  #eventsComponent = null;
+
+  #eventsModel = new EventsModel();
+  #offersModel = new OffersModel();
+  #destinationsModel = new DestinationsModel();
 
   constructor({ tripMainElement, filtersElement, siteMainElement }) {
-    this.tripMainElement = tripMainElement;
-    this.filtersElement = filtersElement;
-    this.siteMainElement = siteMainElement;
+    this.#tripMainElement = tripMainElement;
+    this.#filtersElement = filtersElement;
+    this.#siteMainElement = siteMainElement;
   }
 
   init() {
-    this.filtersComponent = new FiltersPresenter({
-      container: this.filtersElement,
+    this.#filtersComponent = new FiltersPresenter({
+      container: this.#filtersElement,
     });
-    this.sortingComponent = new SortingPresenter({
-      container: this.siteMainElement,
+    this.#sortingComponent = new SortingPresenter({
+      container: this.#siteMainElement,
     });
-    this.eventsComponent = new EventsPresenter({
-      container: this.siteMainElement,
-      eventsModel: this.eventsModel,
-      offersModel: this.offersModel,
-      destinationsModel: this.destinationsModel,
+    this.#eventsComponent = new EventsPresenter({
+      container: this.#siteMainElement,
+      eventsModel: this.#eventsModel,
+      offersModel: this.#offersModel,
+      destinationsModel: this.#destinationsModel,
     });
-    render(new TripInfoView(), this.tripMainElement, RenderPosition.AFTERBEGIN);
-    this.filtersComponent.init();
-    this.sortingComponent.init();
-    this.eventsComponent.init();
+    render(
+      new TripInfoView(),
+      this.#tripMainElement,
+      RenderPosition.AFTERBEGIN
+    );
+    this.#filtersComponent.init();
+    this.#sortingComponent.init();
+    this.#eventsComponent.init();
   }
 }
