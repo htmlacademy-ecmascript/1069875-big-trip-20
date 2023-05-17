@@ -22,6 +22,12 @@ const DateFormats = {
   TIME: 'h:mm',
 };
 
+const DurationFormats = {
+  DAYS: 'DD[D] HH[H] mm[M]',
+  HOURS: 'HH[H] mm[M]',
+  MINUTES: 'mm[M]',
+};
+
 const EMPTY_EVENT = {
   type: EVENTS_TYPES[0],
   destination: '',
@@ -32,4 +38,4 @@ const EMPTY_EVENT = {
   isFavorite: false,
 };
 
-export { EVENTS_TYPES, FILTERS_NAMES, SORTING_NAMES, DateFormats, EMPTY_EVENT };
+export { EVENTS_TYPES, FILTERS_NAMES, SORTING_NAMES, DateFormats, DurationFormats, EMPTY_EVENT };

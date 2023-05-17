@@ -1,3 +1,4 @@
+import { DurationFormats } from './const.js';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 
@@ -16,18 +17,25 @@ function transformDate(date, format) {
 }
 
 function getDuration(timeFrom, timeTo) {
-
   const timeDuration = dayjs.duration(dayjs(timeTo).diff(timeFrom));
 
-  let days = timeDuration.days();
-  days = days ? `${dayjs(days).format('DD[D]')} ` : '';
+  const isDaysLong = Boolean(timeDuration.days());
+  const isHoursLong = Boolean(timeDuration.hours());
 
-  let hours = timeDuration.hours();
-  hours = hours || days ? `${dayjs(hours).format('HH[H]')} ` : '';
+  let format;
 
-  const minutes = dayjs(timeDuration.minutes()).format('MM[M]');
+  switch (true) {
+    case isDaysLong:
+      format = DurationFormats.DAYS;
+      break;
+    case isHoursLong:
+      format = DurationFormats.HOURS;
+      break;
+    default:
+      format = DurationFormats.MINUTES;
+  }
 
-  return days + hours + minutes;
+  return timeDuration.format(format);
 }
 
 function startStringWithCapital(str) {
