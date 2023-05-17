@@ -55,11 +55,7 @@ function createOffersTemplate({ allOffers, selectedOffersIds }) {
   let offersItemsTemplate = '';
   for (const [offerId, offerInfo] of allOffers.entries()) {
     const isSelected = selectedOffersIds.includes(offerId);
-    offersItemsTemplate += createOffersItemTemplate({
-      offerId: offerId,
-      offerInfo: offerInfo,
-      isSelected: isSelected,
-    });
+    offersItemsTemplate += createOffersItemTemplate({ offerId, offerInfo, isSelected });
   }
 
   return `<section class="event__section  event__section--offers">

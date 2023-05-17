@@ -23,10 +23,10 @@ function createOffersTemplate({ typeOffers, offers }) {
           <ul class="event__selected-offers">${offersItemsTemplate}</ul>`;
 }
 
-function createEventTemplate(event, typeOffers) {
+function createEventTemplate({ event, typeOffers }) {
   const { type, destination, basePrice, isFavorite, offers, dateFrom, dateTo } = event;
 
-  const offersTemplate = offers.length ? createOffersTemplate({ typeOffers: typeOffers, offers: offers }) : '';
+  const offersTemplate = offers.length ? createOffersTemplate({ typeOffers, offers }) : '';
 
   const favoriteClass = isFavorite ? 'event__favorite-btn--active' : '';
 
@@ -81,7 +81,7 @@ export default class EventView {
   }
 
   getTemplate() {
-    return createEventTemplate(this.event, this.typeOffers);
+    return createEventTemplate({ event: this.event, typeOffers: this.typeOffers });
   }
 
   getElement() {

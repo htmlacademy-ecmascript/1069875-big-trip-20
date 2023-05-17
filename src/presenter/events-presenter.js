@@ -32,7 +32,7 @@ export default class EventsPresenter {
       const event = this.events[i];
       const typeOffers = this.offers.get(event.type);
       render(
-        new EventView({ event: event, typeOffers: typeOffers }),
+        new EventView({ event, typeOffers }),
         this.eventsListComponent.getElement()
       );
     }
