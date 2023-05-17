@@ -38,12 +38,12 @@ function createDestinationInfoTemplate(destination) {
           </section>`;
 }
 
-function createOffersItemTemplate({ offer, isSelected }) {
-  const { title, price } = offer;
+function createOffersItemTemplate({ offerId, offerInfo, isSelected }) {
+  const { title, price } = offerInfo;
   const selectedAttribute = isSelected ? 'checked' : '';
   return `<div class="event__offer-selector">
-            <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage" ${selectedAttribute}>
-            <label class="event__offer-label" for="event-offer-luggage-1">
+            <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offerId}-1" type="checkbox" name="event-offer-${offerId}" ${selectedAttribute}>
+            <label class="event__offer-label" for="event-offer-${offerId}-1">
               <span class="event__offer-title">${title}</span>
               &plus;&euro;&nbsp;
               <span class="event__offer-price">${price}</span>
@@ -53,9 +53,13 @@ function createOffersItemTemplate({ offer, isSelected }) {
 
 function createOffersTemplate({ allOffers, selectedOffersIds }) {
   let offersItemsTemplate = '';
-  for (const [ id, offer ] of allOffers) {
-    const isSelected = selectedOffersIds.includes(id);
-    offersItemsTemplate += createOffersItemTemplate({ offer: offer, isSelected: isSelected });
+  for (const [offerId, offerInfo] of allOffers.entries()) {
+    const isSelected = selectedOffersIds.includes(offerId);
+    offersItemsTemplate += createOffersItemTemplate({
+      offerId: offerId,
+      offerInfo: offerInfo,
+      isSelected: isSelected,
+    });
   }
 
   return `<section class="event__section  event__section--offers">
@@ -79,7 +83,7 @@ function createFormTemplate({ event = EMPTY_EVENT, typeOffers = [], destinations
     createTypesListItemTemplate(title)
   ).join('');
 
-  const offersTemplate = typeOffers.length
+  const offersTemplate = typeOffers.size
     ? createOffersTemplate({ allOffers: typeOffers, selectedOffersIds: offers })
     : '';
 
