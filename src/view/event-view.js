@@ -1,6 +1,6 @@
 import { DateFormats } from '../const.js';
 import { transformDate, getDuration } from '../utils.js';
-import { createElement } from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function getChosenOffers(offers, offersIds) {
   return offersIds.map((offerId) => offers.get(offerId));
@@ -23,10 +23,10 @@ function createOffersTemplate({ typeOffers, offers }) {
           <ul class="event__selected-offers">${offersItemsTemplate}</ul>`;
 }
 
-function createEventTemplate(event, typeOffers) {
+function createEventTemplate({ event, typeOffers }) {
   const { type, destination, basePrice, isFavorite, offers, dateFrom, dateTo } = event;
 
-  const offersTemplate = offers.length ? createOffersTemplate({ typeOffers: typeOffers, offers: offers }) : '';
+  const offersTemplate = offers.length ? createOffersTemplate({ typeOffers, offers }) : '';
 
   const favoriteClass = isFavorite ? 'event__favorite-btn--active' : '';
 
@@ -73,26 +73,30 @@ function createEventTemplate(event, typeOffers) {
             </li>`;
 }
 
-export default class EventView {
+export default class EventView extends AbstractView {
+  #event = null;
+  #typeOffers = null;
+  #handleEditBtnClick = null;
 
-  constructor({ event, typeOffers }) {
-    this.event = event;
-    this.typeOffers = typeOffers;
+  constructor({ event, typeOffers, onEditBtnClick }) {
+    super();
+    this.#event = event;
+    this.#typeOffers = typeOffers;
+    this.#handleEditBtnClick = onEditBtnClick;
+    this.element
+      .querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#editBtnClickHandler);
   }
 
-  getTemplate() {
-    return createEventTemplate(this.event, this.typeOffers);
+  get template() {
+    return createEventTemplate({
+      event: this.#event,
+      typeOffers: this.#typeOffers,
+    });
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
+  #editBtnClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditBtnClick();
+  };
 }
