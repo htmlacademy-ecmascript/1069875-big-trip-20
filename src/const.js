@@ -10,7 +10,12 @@ const EVENTS_TYPES = [
   'restaurant',
 ];
 
-const FILTERS_NAMES = ['everything', 'future', 'present', 'past'];
+const FiltersNames = {
+  ALL : 'everything',
+  FUTURE: 'future',
+  PRESENT: 'present',
+  PAST: 'past',
+};
 
 const SORTING_NAMES = ['day', 'event', 'time', 'price', 'offers'];
 
@@ -38,4 +43,11 @@ const EMPTY_EVENT = {
   isFavorite: false,
 };
 
-export { EVENTS_TYPES, FILTERS_NAMES, SORTING_NAMES, DateFormats, DurationFormats, EMPTY_EVENT };
+export {
+  EVENTS_TYPES,
+  FiltersNames,
+  SORTING_NAMES,
+  DateFormats,
+  DurationFormats,
+  EMPTY_EVENT,
+};

@@ -4,10 +4,11 @@ import { render } from '../framework/render.js';
 export default class FiltersPresenter {
   #container = null;
 
-  #filtersComponent = new FiltersView();
+  #filtersComponent = null;
 
-  constructor({ container }) {
+  constructor({ container, filters }) {
     this.#container = container;
+    this.#filtersComponent = new FiltersView({ filters });
   }
 
   init() {

@@ -1,8 +1,12 @@
-import { DurationFormats } from './const.js';
+import { DurationFormats, FiltersNames } from './const.js';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 
 dayjs.extend(duration);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 function getRandomNumber(min = 1, max = 10) {
   return Math.floor(Math.random() * (max + 1 - min) + min);
@@ -46,6 +50,20 @@ function isKeyEscape(evt) {
   return evt.key === 'Escape';
 }
 
+const filtersFunctions = {
+  [FiltersNames.ALL]: (event) => event,
+  [FiltersNames.FUTURE]: (event) =>
+    event.filter(({ dateFrom }) => dayjs(dateFrom).isAfter(dayjs(), 'day')),
+  [FiltersNames.PRESENT]: (event) =>
+    event.filter(
+      ({ dateFrom, dateTo }) =>
+        dayjs(dateFrom).isSameOrBefore(dayjs(), 'day') &&
+        dayjs(dateTo).isSameOrAfter(dayjs(), 'day')
+    ),
+  [FiltersNames.PAST]: (event) =>
+    event.filter(({ dateTo }) => dayjs(dateTo).isBefore(dayjs(), 'day')),
+};
+
 export {
   getRandomNumber,
   getRandomArrayElement,
@@ -53,4 +71,5 @@ export {
   getDuration,
   startStringWithCapital,
   isKeyEscape,
+  filtersFunctions,
 };
