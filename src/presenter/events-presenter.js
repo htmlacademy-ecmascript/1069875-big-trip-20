@@ -1,8 +1,10 @@
 import EventsListView from '../view/events-list-view.js';
 import EventView from '../view/event-view.js';
+import NoEventsView from '../view/no-events-view.js';
 import FormPresenter from './form-presenter.js';
 import { render, replace } from '../framework/render.js';
 import { isKeyEscape } from '../utils.js';
+import { NoEventsMessages } from '../const.js';
 
 export default class EventsPresenter {
   #container = null;
@@ -28,8 +30,19 @@ export default class EventsPresenter {
     this.#events = [...this.#eventsModel.events];
     this.#offers = this.#offersModel.offers;
     this.#destinations = this.#destinationsModel.destinations;
+    this.#renderEvents();
+  }
 
+  #renderEvents() {
     render(this.#eventsListComponent, this.#container);
+
+    if (!this.#events.length) {
+      render(
+        new NoEventsView({ message: NoEventsMessages.ALL }),
+        this.#eventsListComponent.element
+      );
+      return;
+    }
 
     this.#events.forEach((event) => this.#renderEvent(event));
   }

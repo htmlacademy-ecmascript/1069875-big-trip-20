@@ -17,6 +17,13 @@ const FiltersNames = {
   PAST: 'past',
 };
 
+const NoEventsMessages = {
+  ALL: 'Click New Event to create your first point',
+  FUTURE: 'There are no future events now',
+  PRESENT: 'There are no present events now',
+  PAST: 'There are no past events now',
+};
+
 const SORTING_NAMES = ['day', 'event', 'time', 'price', 'offers'];
 
 const DateFormats = {
@@ -46,6 +53,7 @@ const EMPTY_EVENT = {
 export {
   EVENTS_TYPES,
   FiltersNames,
+  NoEventsMessages,
   SORTING_NAMES,
   DateFormats,
   DurationFormats,
