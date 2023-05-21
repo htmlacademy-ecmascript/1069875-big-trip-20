@@ -5,6 +5,7 @@ import TripInfoView from '../view/trip-info-view.js';
 import FiltersPresenter from './filters-presenter.js';
 import SortingPresenter from './sorting-presenter.js';
 import EventsPresenter from './events-presenter.js';
+import { getFilters } from '../mock/filters.js';
 import { render, RenderPosition } from '../framework/render.js';
 
 export default class AppPresenter {
@@ -20,6 +21,8 @@ export default class AppPresenter {
   #offersModel = new OffersModel();
   #destinationsModel = new DestinationsModel();
 
+  #filters = getFilters(this.#eventsModel.events);
+
   constructor({ tripMainElement, filtersElement, siteMainElement }) {
     this.#tripMainElement = tripMainElement;
     this.#filtersElement = filtersElement;
@@ -29,6 +32,7 @@ export default class AppPresenter {
   init() {
     this.#filtersComponent = new FiltersPresenter({
       container: this.#filtersElement,
+      filters: this.#filters,
     });
     this.#sortingComponent = new SortingPresenter({
       container: this.#siteMainElement,
