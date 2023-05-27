@@ -3,10 +3,16 @@ import FormPresenter from './form-presenter.js';
 import { render, replace, remove } from '../framework/render.js';
 import { isKeyEscape } from '../utils.js';
 
+const Mode = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
+};
+
 export default class EventPresenter {
   #container = null;
 
   #event = null;
+  #mode = Mode.DEFAULT;
 
   #eventComponent = null;
   #formPresenter = null;
@@ -15,12 +21,20 @@ export default class EventPresenter {
   #destinations = null;
 
   #handleEventChange = null;
+  #handleModeChange = null;
 
-  constructor({ container, offers, destinations, onEventChange }) {
+  constructor({
+    container,
+    offers,
+    destinations,
+    onEventChange,
+    onModeChange,
+  }) {
     this.#container = container;
     this.#offers = offers;
     this.#destinations = destinations;
     this.#handleEventChange = onEventChange;
+    this.#handleModeChange = onModeChange;
   }
 
   init(event) {
@@ -51,11 +65,11 @@ export default class EventPresenter {
       return;
     }
 
-    if (this.#container.contains(prevEventComponent.element)) {
+    if (this.#mode === Mode.DEFAULT) {
       replace(this.#eventComponent, prevEventComponent);
     }
 
-    if (this.#container.contains(prevFormPresenter.formComponent.element)) {
+    if (this.#mode === Mode.EDITING) {
       replace(
         this.#formPresenter.formComponent,
         prevFormPresenter.formComponent
@@ -71,12 +85,21 @@ export default class EventPresenter {
     remove(this.#formPresenter.formComponent);
   }
 
+  resetView() {
+    if (this.#mode !== Mode.DEFAULT) {
+      this.#switchFormToEvent();
+    }
+  }
+
   #switchEventToForm() {
     replace(this.#formPresenter.formComponent, this.#eventComponent);
+    this.#handleModeChange();
+    this.#mode = Mode.EDITING;
   }
 
   #switchFormToEvent() {
     replace(this.#eventComponent, this.#formPresenter.formComponent);
+    this.#mode = Mode.DEFAULT;
   }
 
   #escKeyDownHandler = (evt) => {
@@ -99,7 +122,10 @@ export default class EventPresenter {
   };
 
   #handleFavoriteClick = () => {
-    this.#handleEventChange({ ...this.#event, isFavorite: !this.#event.isFavorite});
+    this.#handleEventChange({
+      ...this.#event,
+      isFavorite: !this.#event.isFavorite,
+    });
   };
 
   #handleFormSubmit = (changedEvent) => {

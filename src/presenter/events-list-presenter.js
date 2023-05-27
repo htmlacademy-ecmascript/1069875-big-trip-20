@@ -58,6 +58,7 @@ export default class EventsListPresenter {
       offers: this.#offers,
       destinations: this.#destinations,
       onEventChange: this.#handleEventChange,
+      onModeChange: this.#handleModeChange,
     });
     eventPresenter.init(event);
     this.#eventPresenters.set(event.id, eventPresenter);
@@ -66,5 +67,9 @@ export default class EventsListPresenter {
   #handleEventChange = (updatedEvent) => {
     this.#events.set(updatedEvent.id, updatedEvent);
     this.#eventPresenters.get(updatedEvent.id).init(updatedEvent);
+  };
+
+  #handleModeChange = () => {
+    this.#eventPresenters.forEach((presenter) => presenter.resetView());
   };
 }
