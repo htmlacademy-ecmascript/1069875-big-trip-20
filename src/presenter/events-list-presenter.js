@@ -13,7 +13,7 @@ export default class EventsListPresenter {
   #offersModel = null;
   #destinationsModel = null;
 
-  #events = [];
+  #events = null;
   #offers = null;
   #destinations = null;
 
@@ -27,7 +27,7 @@ export default class EventsListPresenter {
   }
 
   init() {
-    this.#events = [...this.#eventsModel.events];
+    this.#events = new Map(this.#eventsModel.events.map((event) => [event.id, event]));
     this.#offers = this.#offersModel.offers;
     this.#destinations = this.#destinationsModel.destinations;
     this.#renderEventsList();
@@ -41,7 +41,7 @@ export default class EventsListPresenter {
   #renderEventsList() {
     render(this.#eventsListComponent, this.#container);
 
-    if (!this.#events.length) {
+    if (!this.#events.size) {
       render(
         new NoEventsView({ message: NoEventsMessages.ALL }),
         this.#eventsListComponent.element
@@ -57,8 +57,14 @@ export default class EventsListPresenter {
       container: this.#eventsListComponent.element,
       offers: this.#offers,
       destinations: this.#destinations,
+      onEventChange: this.#handleEventChange,
     });
     eventPresenter.init(event);
     this.#eventPresenters.set(event.id, eventPresenter);
   }
+
+  #handleEventChange = (updatedEvent) => {
+    this.#events.set(updatedEvent.id, updatedEvent);
+    this.#eventPresenters.get(updatedEvent.id).init(updatedEvent);
+  };
 }

@@ -14,10 +14,13 @@ export default class EventPresenter {
   #offers = null;
   #destinations = null;
 
-  constructor({ container, offers, destinations }) {
+  #handleEventChange = null;
+
+  constructor({ container, offers, destinations, onEventChange }) {
     this.#container = container;
     this.#offers = offers;
     this.#destinations = destinations;
+    this.#handleEventChange = onEventChange;
   }
 
   init(event) {
@@ -30,10 +33,8 @@ export default class EventPresenter {
     this.#eventComponent = new EventView({
       event: this.#event,
       typeOffers,
-      onEditBtnClick: () => {
-        this.#switchEventToForm();
-        document.addEventListener('keydown', this.#escKeyDownHandler);
-      }
+      openForm: this.#handleOpenFormClick,
+      onFavoriteClick: this.#handleFavoriteClick,
     });
 
     this.#formPresenter = new FormPresenter({
@@ -41,10 +42,8 @@ export default class EventPresenter {
       typeOffers,
       destinations: this.#destinations,
       container: this.#container,
-      closeForm: () => {
-        this.#switchFormToEvent();
-        document.removeEventListener('keydown', this.#escKeyDownHandler);
-      }
+      closeForm: this.#handleCloseFormClick,
+      onFormSubmit: this.#handleFormSubmit,
     });
 
     if (prevEventComponent === null || prevFormPresenter === null) {
@@ -80,12 +79,31 @@ export default class EventPresenter {
     replace(this.#eventComponent, this.#formPresenter.formComponent);
   }
 
-  #escKeyDownHandler(evt) {
+  #escKeyDownHandler = (evt) => {
     if (!isKeyEscape(evt)) {
       return;
     }
     evt.preventDefault();
     this.#switchFormToEvent();
     document.removeEventListener('keydown', this.#escKeyDownHandler);
-  }
+  };
+
+  #handleOpenFormClick = () => {
+    this.#switchEventToForm();
+    document.addEventListener('keydown', this.#escKeyDownHandler);
+  };
+
+  #handleCloseFormClick = () => {
+    this.#switchFormToEvent();
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
+  };
+
+  #handleFavoriteClick = () => {
+    this.#handleEventChange({ ...this.#event, isFavorite: !this.#event.isFavorite});
+  };
+
+  #handleFormSubmit = (changedEvent) => {
+    this.#handleEventChange(changedEvent);
+    this.#handleCloseFormClick();
+  };
 }

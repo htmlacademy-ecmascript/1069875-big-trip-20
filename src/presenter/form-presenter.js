@@ -4,15 +4,21 @@ import { render } from '../framework/render.js';
 export default class FormPresenter {
   #container = null;
 
-  #formComponent = null;
-
-  constructor({ container, event, typeOffers, destinations, closeForm }) {
+  constructor({
+    container,
+    event,
+    typeOffers,
+    destinations,
+    closeForm,
+    onFormSubmit,
+  }) {
     this.#container = container;
     this.formComponent = new FormView({
       event,
       typeOffers,
       destinations,
       closeForm,
+      onFormSubmit,
     });
   }
 
