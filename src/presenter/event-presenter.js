@@ -52,29 +52,32 @@ export default class EventPresenter {
       return;
     }
 
-    if (this.#container.contains(prevEventComponent)) {
+    if (this.#container.contains(prevEventComponent.element)) {
       replace(this.#eventComponent, prevEventComponent);
     }
 
-    if (this.#container.contains(prevFormPresenter)) {
-      replace(this.#formPresenter, prevFormPresenter);
+    if (this.#container.contains(prevFormPresenter.formComponent.element)) {
+      replace(
+        this.#formPresenter.formComponent,
+        prevFormPresenter.formComponent
+      );
     }
 
     remove(prevEventComponent);
-    remove(prevFormPresenter);
+    remove(prevFormPresenter.formComponent);
   }
 
   destroy() {
     remove(this.#eventComponent);
-    remove(this.#formPresenter);
+    remove(this.#formPresenter.formComponent);
   }
 
   #switchEventToForm() {
-    replace(this.#formPresenter.component, this.#eventComponent);
+    replace(this.#formPresenter.formComponent, this.#eventComponent);
   }
 
   #switchFormToEvent() {
-    replace(this.#eventComponent, this.#formPresenter.component);
+    replace(this.#eventComponent, this.#formPresenter.formComponent);
   }
 
   #escKeyDownHandler(evt) {

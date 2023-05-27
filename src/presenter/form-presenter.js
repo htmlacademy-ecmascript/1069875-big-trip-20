@@ -8,7 +8,7 @@ export default class FormPresenter {
 
   constructor({ container, event, typeOffers, destinations, closeForm }) {
     this.#container = container;
-    this.#formComponent = new FormView({
+    this.formComponent = new FormView({
       event,
       typeOffers,
       destinations,
@@ -17,10 +17,6 @@ export default class FormPresenter {
   }
 
   init() {
-    render(this.#formComponent, this.#container);
-  }
-
-  get component() {
-    return this.#formComponent;
+    render(this.formComponent, this.#container);
   }
 }
