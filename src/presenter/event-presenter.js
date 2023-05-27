@@ -1,6 +1,6 @@
 import EventView from '../view/event-view.js';
 import FormPresenter from './form-presenter.js';
-import { render, replace } from '../framework/render.js';
+import { render, replace, remove } from '../framework/render.js';
 import { isKeyEscape } from '../utils.js';
 
 export default class EventPresenter {
@@ -24,6 +24,9 @@ export default class EventPresenter {
     this.#event = event;
     const typeOffers = this.#offers.get(event.type);
 
+    const prevEventComponent = this.#eventComponent;
+    const prevFormPresenter = this.#formPresenter;
+
     this.#eventComponent = new EventView({
       event: this.#event,
       typeOffers,
@@ -44,7 +47,21 @@ export default class EventPresenter {
       }
     });
 
-    render(this.#eventComponent, this.#container);
+    if (prevEventComponent === null || prevFormPresenter === null) {
+      render(this.#eventComponent, this.#container);
+      return;
+    }
+
+    if (this.#container.contains(prevEventComponent)) {
+      replace(this.#eventComponent, prevEventComponent);
+    }
+
+    if (this.#container.contains(prevFormPresenter)) {
+      replace(this.#formPresenter, prevFormPresenter);
+    }
+
+    remove(prevEventComponent);
+    remove(prevFormPresenter);
   }
 
   #switchEventToForm() {
