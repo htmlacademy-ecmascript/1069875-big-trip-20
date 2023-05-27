@@ -4,7 +4,7 @@ import DestinationsModel from '../model/destinations-model.js';
 import TripInfoView from '../view/trip-info-view.js';
 import FiltersPresenter from './filters-presenter.js';
 import SortingPresenter from './sorting-presenter.js';
-import EventsPresenter from './events-presenter.js';
+import EventsListPresenter from './events-list-presenter.js';
 import { getFilters } from '../mock/filters.js';
 import { render, RenderPosition } from '../framework/render.js';
 
@@ -30,26 +30,42 @@ export default class AppPresenter {
   }
 
   init() {
-    this.#filtersComponent = new FiltersPresenter({
-      container: this.#filtersElement,
-      filters: this.#filters,
-    });
-    this.#sortingComponent = new SortingPresenter({
-      container: this.#siteMainElement,
-    });
-    this.#eventsComponent = new EventsPresenter({
-      container: this.#siteMainElement,
-      eventsModel: this.#eventsModel,
-      offersModel: this.#offersModel,
-      destinationsModel: this.#destinationsModel,
-    });
+    this.#renderTripInfo();
+    this.#renderFilters();
+    this.#renderSorting();
+    this.#renderEventsList();
+  }
+
+  #renderTripInfo() {
     render(
       new TripInfoView(),
       this.#tripMainElement,
       RenderPosition.AFTERBEGIN
     );
+  }
+
+  #renderFilters() {
+    this.#filtersComponent = new FiltersPresenter({
+      container: this.#filtersElement,
+      filters: this.#filters,
+    });
     this.#filtersComponent.init();
+  }
+
+  #renderSorting() {
+    this.#sortingComponent = new SortingPresenter({
+      container: this.#siteMainElement,
+    });
     this.#sortingComponent.init();
+  }
+
+  #renderEventsList() {
+    this.#eventsComponent = new EventsListPresenter({
+      container: this.#siteMainElement,
+      eventsModel: this.#eventsModel,
+      offersModel: this.#offersModel,
+      destinationsModel: this.#destinationsModel,
+    });
     this.#eventsComponent.init();
   }
 }
