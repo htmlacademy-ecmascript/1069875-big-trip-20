@@ -64,6 +64,11 @@ export default class EventPresenter {
     remove(prevFormPresenter);
   }
 
+  destroy() {
+    remove(this.#eventComponent);
+    remove(this.#formPresenter);
+  }
+
   #switchEventToForm() {
     replace(this.#formPresenter.component, this.#eventComponent);
   }

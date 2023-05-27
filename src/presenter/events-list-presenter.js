@@ -17,6 +17,8 @@ export default class EventsListPresenter {
   #offers = null;
   #destinations = null;
 
+  #eventPresenters = new Map();
+
   constructor({ container, eventsModel, offersModel, destinationsModel }) {
     this.#container = container;
     this.#eventsModel = eventsModel;
@@ -29,6 +31,11 @@ export default class EventsListPresenter {
     this.#offers = this.#offersModel.offers;
     this.#destinations = this.#destinationsModel.destinations;
     this.#renderEventsList();
+  }
+
+  #clearEventsList() {
+    this.#eventPresenters.forEach((presenter) => presenter.destroy());
+    this.#eventPresenters.clear();
   }
 
   #renderEventsList() {
@@ -52,5 +59,6 @@ export default class EventsListPresenter {
       destinations: this.#destinations,
     });
     eventPresenter.init(event);
+    this.#eventPresenters.set(event.id, eventPresenter);
   }
 }
