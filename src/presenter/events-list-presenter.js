@@ -3,7 +3,8 @@ import NoEventsView from '../view/no-events-view.js';
 import SortingView from '../view/sorting-view.js';
 import EventPresenter from './event-presenter.js';
 import { render } from '../framework/render.js';
-import { NoEventsMessages } from '../const.js';
+import { NoEventsMessages, SortingNames } from '../const.js';
+import { sortByTime, sortByPrice } from '../utils.js';
 
 export default class EventsListPresenter {
   #container = null;
@@ -16,10 +17,13 @@ export default class EventsListPresenter {
   #destinationsModel = null;
 
   #events = null;
+  #sourcedEvents = [];
   #offers = null;
   #destinations = null;
 
   #eventPresenters = new Map();
+
+  #currentSorting = SortingNames.DAY;
 
   constructor({ container, eventsModel, offersModel, destinationsModel }) {
     this.#container = container;
@@ -29,7 +33,10 @@ export default class EventsListPresenter {
   }
 
   init() {
-    this.#events = new Map(this.#eventsModel.events.map((event) => [event.id, event]));
+    this.#sourcedEvents = [...this.#eventsModel.events];
+    this.#events = new Map(
+      this.#sourcedEvents.map((event) => [event.id, event])
+    );
     this.#offers = this.#offersModel.offers;
     this.#destinations = this.#destinationsModel.destinations;
     this.#renderSorting();
@@ -51,13 +58,11 @@ export default class EventsListPresenter {
       );
       return;
     }
-
-    this.#events.forEach((event) => this.#renderEvent(event));
+    this.#renderEvents();
   }
 
-  #renderSorting() {
-    this.#sortingComponent = new SortingView();
-    render(this.#sortingComponent, this.#eventsListComponent.element);
+  #renderEvents() {
+    this.#events.forEach((event) => this.#renderEvent(event));
   }
 
   #renderEvent(event) {
@@ -72,8 +77,49 @@ export default class EventsListPresenter {
     this.#eventPresenters.set(event.id, eventPresenter);
   }
 
+  #renderSorting() {
+    this.#sortingComponent = new SortingView({
+      onSortingClick: this.#handleSortingClick,
+    });
+    render(this.#sortingComponent, this.#eventsListComponent.element);
+  }
+
+  #sortEvents(sortType) {
+    this.#currentSorting = sortType;
+    switch (sortType) {
+      case SortingNames.TIME:
+        this.#events = new Map(
+          [...this.#sourcedEvents]
+            .sort(sortByTime)
+            .map((event) => [event.id, event])
+        );
+        break;
+      case SortingNames.PRICE:
+        this.#events = new Map(
+          [...this.#sourcedEvents]
+            .sort(sortByPrice)
+            .map((event) => [event.id, event])
+        );
+        break;
+      default:
+        this.#events = new Map(
+          this.#sourcedEvents.map((event) => [event.id, event])
+        );
+    }
+  }
+
+  #handleSortingClick = (sortType) => {
+    if (sortType === this.#currentSorting) {
+      return;
+    }
+    this.#sortEvents(sortType);
+    this.#clearEventsList();
+    this.#renderEvents();
+  };
+
   #handleEventChange = (updatedEvent) => {
     this.#events.set(updatedEvent.id, updatedEvent);
+    this.#sourcedEvents.set(updatedEvent.id, updatedEvent);
     this.#eventPresenters.get(updatedEvent.id).init(updatedEvent);
   };
 

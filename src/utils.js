@@ -20,8 +20,12 @@ function transformDate(date, format) {
   return dayjs(date).format(format);
 }
 
+function calculateDuration(timeFrom, timeTo) {
+  return dayjs.duration(dayjs(timeTo).diff(timeFrom));
+}
+
 function getDuration(timeFrom, timeTo) {
-  const timeDuration = dayjs.duration(dayjs(timeTo).diff(timeFrom));
+  const timeDuration = calculateDuration(timeFrom, timeTo);
 
   const isDaysLong = Boolean(timeDuration.days());
   const isHoursLong = Boolean(timeDuration.hours());
@@ -64,6 +68,16 @@ const filtersFunctions = {
     event.filter(({ dateTo }) => dayjs(dateTo).isBefore(dayjs(), 'day')),
 };
 
+function sortByTime(itemA, itemB) {
+  const timeA = calculateDuration(itemA.dateFrom, itemA.dateTo).asMinutes();
+  const timeB = calculateDuration(itemB.dateFrom, itemB.dateTo).asMinutes();
+  return timeB - timeA;
+}
+
+function sortByPrice(itemA, itemB) {
+  return itemB.basePrice - itemA.basePrice;
+}
+
 export {
   getRandomNumber,
   getRandomArrayElement,
@@ -72,4 +86,6 @@ export {
   startStringWithCapital,
   isKeyEscape,
   filtersFunctions,
+  sortByTime,
+  sortByPrice,
 };
