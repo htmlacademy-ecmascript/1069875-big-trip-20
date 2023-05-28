@@ -4,7 +4,7 @@ import SortingView from '../view/sorting-view.js';
 import EventPresenter from './event-presenter.js';
 import { render } from '../framework/render.js';
 import { NoEventsMessages, SortingNames } from '../const.js';
-import { sortByTime, sortByPrice } from '../utils.js';
+import { sortByTime, sortByPrice, sortMap } from '../utils.js';
 
 export default class EventsListPresenter {
   #container = null;
@@ -17,7 +17,7 @@ export default class EventsListPresenter {
   #destinationsModel = null;
 
   #events = null;
-  #sourcedEvents = [];
+  #sourcedEvents = null;
   #offers = null;
   #destinations = null;
 
@@ -33,10 +33,10 @@ export default class EventsListPresenter {
   }
 
   init() {
-    this.#sourcedEvents = [...this.#eventsModel.events];
     this.#events = new Map(
-      this.#sourcedEvents.map((event) => [event.id, event])
+      this.#eventsModel.events.map((event) => [event.id, event])
     );
+    this.#sourcedEvents = new Map(this.#events);
     this.#offers = this.#offersModel.offers;
     this.#destinations = this.#destinationsModel.destinations;
     this.#renderSorting();
@@ -88,23 +88,13 @@ export default class EventsListPresenter {
     this.#currentSorting = sortType;
     switch (sortType) {
       case SortingNames.TIME:
-        this.#events = new Map(
-          [...this.#sourcedEvents]
-            .sort(sortByTime)
-            .map((event) => [event.id, event])
-        );
+        this.#events = sortMap(this.#sourcedEvents, sortByTime);
         break;
       case SortingNames.PRICE:
-        this.#events = new Map(
-          [...this.#sourcedEvents]
-            .sort(sortByPrice)
-            .map((event) => [event.id, event])
-        );
+        this.#events = sortMap(this.#sourcedEvents, sortByPrice);
         break;
       default:
-        this.#events = new Map(
-          this.#sourcedEvents.map((event) => [event.id, event])
-        );
+        this.#events = new Map(this.#sourcedEvents);
     }
   }
 

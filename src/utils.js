@@ -78,6 +78,12 @@ function sortByPrice(itemA, itemB) {
   return itemB.basePrice - itemA.basePrice;
 }
 
+function sortMap(map, sortingFn) {
+  return new Map(
+    [...map].sort((itemA, itemB) => sortingFn(itemA[1], itemB[1]))
+  );
+}
+
 export {
   getRandomNumber,
   getRandomArrayElement,
@@ -88,4 +94,5 @@ export {
   filtersFunctions,
   sortByTime,
   sortByPrice,
+  sortMap,
 };
