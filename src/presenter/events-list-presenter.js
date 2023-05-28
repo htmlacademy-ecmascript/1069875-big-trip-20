@@ -1,5 +1,6 @@
 import EventsListView from '../view/events-list-view.js';
 import NoEventsView from '../view/no-events-view.js';
+import SortingView from '../view/sorting-view.js';
 import EventPresenter from './event-presenter.js';
 import { render } from '../framework/render.js';
 import { NoEventsMessages } from '../const.js';
@@ -8,6 +9,7 @@ export default class EventsListPresenter {
   #container = null;
 
   #eventsListComponent = new EventsListView();
+  #sortingComponent = null;
 
   #eventsModel = null;
   #offersModel = null;
@@ -30,6 +32,7 @@ export default class EventsListPresenter {
     this.#events = new Map(this.#eventsModel.events.map((event) => [event.id, event]));
     this.#offers = this.#offersModel.offers;
     this.#destinations = this.#destinationsModel.destinations;
+    this.#renderSorting();
     this.#renderEventsList();
   }
 
@@ -50,6 +53,11 @@ export default class EventsListPresenter {
     }
 
     this.#events.forEach((event) => this.#renderEvent(event));
+  }
+
+  #renderSorting() {
+    this.#sortingComponent = new SortingView();
+    render(this.#sortingComponent, this.#eventsListComponent.element);
   }
 
   #renderEvent(event) {
