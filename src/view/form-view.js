@@ -148,14 +148,17 @@ export default class FormView extends AbstractView {
   #event = null;
   #typeOffers = null;
   #destinations = null;
-  #handleCloseForm = null;
 
-  constructor({ event, typeOffers, destinations, closeForm }) {
+  #handleCloseForm = null;
+  #handleFormSubmit = null;
+
+  constructor({ event, typeOffers, destinations, closeForm, onFormSubmit }) {
     super();
     this.#event = event;
     this.#typeOffers = typeOffers;
     this.#destinations = destinations;
     this.#handleCloseForm = closeForm;
+    this.#handleFormSubmit = onFormSubmit;
     this.element
       .querySelector('form')
       .addEventListener('submit', this.#formSubmitHandler);
@@ -174,7 +177,7 @@ export default class FormView extends AbstractView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleCloseForm();
+    this.#handleFormSubmit(this.#event);
   };
 
   #editBtnClickHandler = (evt) => {
