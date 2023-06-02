@@ -68,8 +68,8 @@ export default class EventsListPresenter {
   #renderEvent(event) {
     const eventPresenter = new EventPresenter({
       container: this.#eventsListComponent.element,
-      offers: this.#offers,
-      destinations: this.#destinations,
+      offersModel: this.#offersModel,
+      destinationsModel: this.#destinationsModel,
       onEventChange: this.#handleEventChange,
       onModeChange: this.#handleModeChange,
     });

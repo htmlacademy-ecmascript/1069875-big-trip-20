@@ -17,29 +17,29 @@ export default class EventPresenter {
   #eventComponent = null;
   #formPresenter = null;
 
-  #offers = null;
-  #destinations = null;
+  #offersModel = null;
+  #destinationsModel = null;
 
   #handleEventChange = null;
   #handleModeChange = null;
 
   constructor({
     container,
-    offers,
-    destinations,
+    offersModel,
+    destinationsModel,
     onEventChange,
     onModeChange,
   }) {
     this.#container = container;
-    this.#offers = offers;
-    this.#destinations = destinations;
+    this.#offersModel = offersModel;
+    this.#destinationsModel = destinationsModel;
     this.#handleEventChange = onEventChange;
     this.#handleModeChange = onModeChange;
   }
 
   init(event) {
     this.#event = event;
-    const typeOffers = this.#offers.get(event.type);
+    const typeOffers = this.#offersModel.offers.get(event.type);
 
     const prevEventComponent = this.#eventComponent;
     const prevFormPresenter = this.#formPresenter;
@@ -53,8 +53,8 @@ export default class EventPresenter {
 
     this.#formPresenter = new FormPresenter({
       event: this.#event,
-      typeOffers,
-      destinations: this.#destinations,
+      offersModel: this.#offersModel,
+      destinationsModel: this.#destinationsModel,
       container: this.#container,
       closeForm: this.#handleCloseFormClick,
       onFormSubmit: this.#handleFormSubmit,
