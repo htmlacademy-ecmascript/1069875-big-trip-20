@@ -23,10 +23,13 @@ function createOffersTemplate({ typeOffers, offers }) {
           <ul class="event__selected-offers">${offersItemsTemplate}</ul>`;
 }
 
-function createEventTemplate({ event, typeOffers }) {
-  const { type, destination, basePrice, isFavorite, offers, dateFrom, dateTo } = event;
+function createEventTemplate({ event, typeOffers, destinationName }) {
+  const { type, basePrice, isFavorite, offers, dateFrom, dateTo } =
+    event;
 
-  const offersTemplate = offers.length ? createOffersTemplate({ typeOffers, offers }) : '';
+  const offersTemplate = offers.length
+    ? createOffersTemplate({ typeOffers, offers })
+    : '';
 
   const favoriteClass = isFavorite ? 'event__favorite-btn--active' : '';
 
@@ -41,7 +44,7 @@ function createEventTemplate({ event, typeOffers }) {
                 <div class="event__type">
                   <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
                 </div>
-                <h3 class="event__title">${type} ${destination}</h3>
+                <h3 class="event__title">${type} ${destinationName}</h3>
                 <div class="event__schedule">
                   <p class="event__time">
                     <time class="event__start-time"
@@ -76,13 +79,15 @@ function createEventTemplate({ event, typeOffers }) {
 export default class EventView extends AbstractView {
   #event = null;
   #typeOffers = null;
+  #destinationName = null;
   #handleEditClick = null;
   #handleFavoriteClick = null;
 
-  constructor({ event, typeOffers, openForm, onFavoriteClick }) {
+  constructor({ event, typeOffers, destinationName, openForm, onFavoriteClick }) {
     super();
     this.#event = event;
     this.#typeOffers = typeOffers;
+    this.#destinationName = destinationName;
     this.#handleEditClick = openForm;
     this.#handleFavoriteClick = onFavoriteClick;
     this.element
@@ -97,6 +102,7 @@ export default class EventView extends AbstractView {
     return createEventTemplate({
       event: this.#event,
       typeOffers: this.#typeOffers,
+      destinationName: this.#destinationName,
     });
   }
 
