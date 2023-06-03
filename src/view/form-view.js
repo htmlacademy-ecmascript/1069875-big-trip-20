@@ -1,6 +1,6 @@
 import { EVENTS_TYPES, EMPTY_EVENT, DateFormats } from '../const.js';
 import { startStringWithCapital, transformDate } from '../utils.js';
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 
 function createTypesListItemTemplate(title) {
   return `<div class="event__type-item">
@@ -38,8 +38,8 @@ function createDestinationInfoTemplate(destination) {
           </section>`;
 }
 
-function createOffersItemTemplate({ offerId, offerInfo, isSelected }) {
-  const { title, price } = offerInfo;
+function createOffersItemTemplate({ offer, offerId }) {
+  const { title, price, isSelected } = offer;
   const selectedAttribute = isSelected ? 'checked' : '';
   return `<div class="event__offer-selector">
             <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offerId}-1" type="checkbox" name="event-offer-${offerId}" ${selectedAttribute}>
@@ -51,12 +51,11 @@ function createOffersItemTemplate({ offerId, offerInfo, isSelected }) {
           </div>`;
 }
 
-function createOffersTemplate({ allOffers, selectedOffersIds }) {
+function createOffersTemplate({ typeOffers }) {
   let offersItemsTemplate = '';
-  for (const [offerId, offerInfo] of allOffers.entries()) {
-    const isSelected = selectedOffersIds.includes(offerId);
-    offersItemsTemplate += createOffersItemTemplate({ offerId, offerInfo, isSelected });
-  }
+  typeOffers.forEach((offer, offerId) => {
+    offersItemsTemplate += createOffersItemTemplate({ offer, offerId });
+  });
 
   return `<section class="event__section  event__section--offers">
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
@@ -68,10 +67,17 @@ function createDataListItemTemplate(title) {
   return `<option value='${title}'></option>`;
 }
 
-function createFormTemplate({ event = EMPTY_EVENT, typeOffers = [], destinations }) {
-  const { type, destination, dateFrom, dateTo, basePrice, offers } = event;
+function createFormTemplate({ event, destinationsNames }) {
+  const {
+    type,
+    dateFrom,
+    dateTo,
+    basePrice,
+    typeOffers,
+    destinationInfo,
+  } = event;
 
-  const dataListTemplate = Array.from(destinations.keys())
+  const dataListTemplate = destinationsNames
     .map((title) => createDataListItemTemplate(title))
     .join('');
 
@@ -80,11 +86,10 @@ function createFormTemplate({ event = EMPTY_EVENT, typeOffers = [], destinations
   ).join('');
 
   const offersTemplate = typeOffers.size
-    ? createOffersTemplate({ allOffers: typeOffers, selectedOffersIds: offers })
+    ? createOffersTemplate({ typeOffers })
     : '';
 
-  const destinationInfo = destinations.get(destination);
-  const destinationInfoTemplate = destinationInfo
+  const destinationInfoTemplate = destinationInfo.description
     ? createDestinationInfoTemplate(destinationInfo)
     : '';
 
@@ -108,7 +113,8 @@ function createFormTemplate({ event = EMPTY_EVENT, typeOffers = [], destinations
                   <label class="event__label  event__type-output" for="event-destination-1">
                     ${startStringWithCapital(type)}
                   </label>
-                  <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination}" list="destination-list-1">
+                  <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination"
+                    value="${destinationInfo.name}" list="destination-list-1">
                   <datalist id="destination-list-1">${dataListTemplate}</datalist>
                 </div>
 
@@ -144,29 +150,39 @@ function createFormTemplate({ event = EMPTY_EVENT, typeOffers = [], destinations
           </li>`;
 }
 
-export default class FormView extends AbstractView {
-  #event = null;
-
+export default class FormView extends AbstractStatefulView {
   #offersModel = null;
   #destinationsModel = null;
 
   #offers = null;
+  #destinations = null;
+  #destinationsNames = null;
 
   #handleCloseForm = null;
   #handleFormSubmit = null;
 
   constructor({
-    event,
+    event = EMPTY_EVENT,
     offersModel,
     destinationsModel,
     closeForm,
     onFormSubmit,
   }) {
     super();
-    this.#event = event;
     this.#offersModel = offersModel;
-    this.#offers = this.#offersModel.offers;
+    this.#offers = new Map(this.#offersModel.offers);
     this.#destinationsModel = destinationsModel;
+    this.#destinations = new Map(this.#destinationsModel.destinations);
+    this.#destinationsNames = Array.from(this.#destinations.values()).map(
+      (info) => info.name
+    );
+    this._setState(
+      FormView.parseEventToState({
+        event,
+        offers: this.#offers,
+        destinations: this.#destinations,
+      })
+    );
     this.#handleCloseForm = closeForm;
     this.#handleFormSubmit = onFormSubmit;
     this.element
@@ -178,16 +194,44 @@ export default class FormView extends AbstractView {
   }
 
   get template() {
-    return createFormTemplate({
-      event: this.#event,
-      typeOffers: this.#typeOffers,
-      destinations: this.#destinations,
+    return createFormTemplate({ event: this._state, destinationsNames: this.#destinationsNames });
+  }
+
+  static parseOffersMap({ allOffers, type, chosenOffers = [] }) {
+    const typeOffers = allOffers.get(type);
+    if (!typeOffers.size) {
+      return new Map();
+    }
+    const offers = new Map(typeOffers);
+    offers.forEach((info, id) => {
+      info.isSelected = chosenOffers.includes(id);
     });
+    return offers;
+  }
+
+  static parseEventToState({ event, offers, destinations }) {
+    const state = { ...event };
+    state.typeOffers = FormView.parseOffersMap({
+      allOffers: offers,
+      type: state.type,
+      chosenOffers: state.offers,
+    });
+    state.destinationInfo = destinations.get(state.destination);
+
+    return state;
+  }
+
+  static parseStateToEvent(state) {
+    const event = { ...state };
+    delete event.typeOffers;
+    delete event.destinationInfo;
+
+    return event;
   }
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit(this.#event);
+    this.#handleFormSubmit(FormView.parseStateToEvent(this._state));
   };
 
   #editBtnClickHandler = (evt) => {
