@@ -77,8 +77,8 @@ function createFormTemplate({ event, destinationsNames }) {
     destinationInfo,
   } = event;
 
-  const dataListTemplate = destinationsNames
-    .map((title) => createDataListItemTemplate(title))
+  const dataListTemplate = Array.from(destinationsNames.keys())
+    .map((name) => createDataListItemTemplate(name))
     .join('');
 
   const typesListTemplate = EVENTS_TYPES.map((title) =>
@@ -173,9 +173,9 @@ export default class FormView extends AbstractStatefulView {
     this.#offers = new Map(this.#offersModel.offers);
     this.#destinationsModel = destinationsModel;
     this.#destinations = new Map(this.#destinationsModel.destinations);
-    this.#destinationsNames = Array.from(this.#destinations.values()).map(
-      (info) => info.name
-    );
+    this.#destinationsNames = new Map(Array.from(this.#destinations.values()).map(
+      ({id, name}) => [name, id]
+    ));
     this._setState(
       FormView.parseEventToState({
         event,
@@ -185,12 +185,19 @@ export default class FormView extends AbstractStatefulView {
     );
     this.#handleCloseForm = closeForm;
     this.#handleFormSubmit = onFormSubmit;
+    this._restoreHandlers();
+  }
+
+  _restoreHandlers() {
     this.element
       .querySelector('form')
       .addEventListener('submit', this.#formSubmitHandler);
     this.element
       .querySelector('.event__rollup-btn')
       .addEventListener('click', this.#editBtnClickHandler);
+    this.element
+      .querySelector('.event__input--destination')
+      .addEventListener('change', this.#destinationChangeHandler);
   }
 
   get template() {
@@ -223,6 +230,7 @@ export default class FormView extends AbstractStatefulView {
 
   static parseStateToEvent(state) {
     const event = { ...state };
+    event.destination = event.destinationInfo.id;
     delete event.typeOffers;
     delete event.destinationInfo;
 
@@ -237,5 +245,16 @@ export default class FormView extends AbstractStatefulView {
   #editBtnClickHandler = (evt) => {
     evt.preventDefault();
     this.#handleCloseForm();
+  };
+
+  #destinationChangeHandler = (evt) => {
+    if (!this.#destinationsNames.has(evt.target.value)) {
+      return;
+    }
+    this.updateElement({
+      destinationInfo: this.#destinations.get(
+        this.#destinationsNames.get(evt.target.value)
+      ),
+    });
   };
 }
