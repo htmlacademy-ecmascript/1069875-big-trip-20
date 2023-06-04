@@ -162,13 +162,15 @@ export default class FormView extends AbstractStatefulView {
 
   #handleCloseForm = null;
   #handleFormSubmit = null;
+  #handleFormReset = null;
 
   constructor({
     event = EMPTY_EVENT,
     offersModel,
     destinationsModel,
-    closeForm,
+    onFormClose,
     onFormSubmit,
+    onFormReset,
   }) {
     super();
     this.#offersModel = offersModel;
@@ -185,8 +187,9 @@ export default class FormView extends AbstractStatefulView {
         destinations: this.#destinations,
       })
     );
-    this.#handleCloseForm = closeForm;
+    this.#handleCloseForm = onFormClose;
     this.#handleFormSubmit = onFormSubmit;
+    this.#handleFormReset = onFormReset;
     this._restoreHandlers();
   }
 
@@ -195,8 +198,11 @@ export default class FormView extends AbstractStatefulView {
       .querySelector('form')
       .addEventListener('submit', this.#formSubmitHandler);
     this.element
+      .querySelector('.event__reset-btn')
+      .addEventListener('click', this.#resetBtnClickHandler);
+    this.element
       .querySelector('.event__rollup-btn')
-      .addEventListener('click', this.#editBtnClickHandler);
+      .addEventListener('click', this.#closeBtnClickHandler);
     this.element
       .querySelector('.event__input--destination')
       .addEventListener('change', this.#destinationChangeHandler);
@@ -243,13 +249,29 @@ export default class FormView extends AbstractStatefulView {
     return event;
   }
 
+  reset(event) {
+    this.updateElement(
+      FormView.parseEventToState({
+        event,
+        offers: this.#offers,
+        destinations: this.#destinations,
+      })
+    );
+  }
+
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
     this.#handleFormSubmit(FormView.parseStateToEvent(this._state));
   };
 
-  #editBtnClickHandler = (evt) => {
+  #resetBtnClickHandler = (evt) => {
     evt.preventDefault();
+    this.#handleFormReset();
+  };
+
+  #closeBtnClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleFormReset();
     this.#handleCloseForm();
   };
 
@@ -270,7 +292,9 @@ export default class FormView extends AbstractStatefulView {
     this.updateElement({
       type: evt.target.value,
       typeOffers: this.#offers.get(evt.target.value),
-      offersSelection: getChosenItemsMap(Array.from(this._state.typeOffers.keys())),
+      offersSelection: getChosenItemsMap(
+        Array.from(this._state.typeOffers.keys())
+      ),
     });
   };
 

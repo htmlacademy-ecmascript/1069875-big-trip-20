@@ -51,7 +51,7 @@ export default class EventPresenter {
       event: this.#event,
       typeOffers,
       destinationName,
-      openForm: this.#handleOpenFormClick,
+      onFormOpen: this.#handleFormOpen,
       onFavoriteClick: this.#handleFavoriteClick,
     });
 
@@ -60,8 +60,9 @@ export default class EventPresenter {
       offersModel: this.#offersModel,
       destinationsModel: this.#destinationsModel,
       container: this.#container,
-      closeForm: this.#handleCloseFormClick,
+      onFormClose: this.#handleFormClose,
       onFormSubmit: this.#handleFormSubmit,
+      onFormReset: this.#handleFormReset,
     });
 
     if (prevEventComponent === null || prevFormComponent === null) {
@@ -88,7 +89,8 @@ export default class EventPresenter {
 
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
-      this.#switchFormToEvent();
+      this.#handleFormReset();
+      this.#handleFormClose();
     }
   }
 
@@ -108,18 +110,27 @@ export default class EventPresenter {
       return;
     }
     evt.preventDefault();
-    this.#switchFormToEvent();
-    document.removeEventListener('keydown', this.#escKeyDownHandler);
+    this.#handleFormReset();
+    this.#handleFormClose();
   };
 
-  #handleOpenFormClick = () => {
+  #handleFormOpen = () => {
     this.#switchEventToForm();
     document.addEventListener('keydown', this.#escKeyDownHandler);
   };
 
-  #handleCloseFormClick = () => {
+  #handleFormClose = () => {
     this.#switchFormToEvent();
     document.removeEventListener('keydown', this.#escKeyDownHandler);
+  };
+
+  #handleFormSubmit = (changedEvent) => {
+    this.#handleEventChange(changedEvent);
+    this.#handleFormClose();
+  };
+
+  #handleFormReset = () => {
+    this.#formComponent.reset(this.#event);
   };
 
   #handleFavoriteClick = () => {
@@ -127,10 +138,5 @@ export default class EventPresenter {
       ...this.#event,
       isFavorite: !this.#event.isFavorite,
     });
-  };
-
-  #handleFormSubmit = (changedEvent) => {
-    this.#handleEventChange(changedEvent);
-    this.#handleCloseFormClick();
   };
 }

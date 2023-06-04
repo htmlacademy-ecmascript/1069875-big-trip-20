@@ -83,12 +83,12 @@ export default class EventView extends AbstractView {
   #handleEditClick = null;
   #handleFavoriteClick = null;
 
-  constructor({ event, typeOffers, destinationName, openForm, onFavoriteClick }) {
+  constructor({ event, typeOffers, destinationName, onFormOpen, onFavoriteClick }) {
     super();
     this.#event = event;
     this.#typeOffers = typeOffers;
     this.#destinationName = destinationName;
-    this.#handleEditClick = openForm;
+    this.#handleEditClick = onFormOpen;
     this.#handleFavoriteClick = onFavoriteClick;
     this.element
       .querySelector('.event__rollup-btn')
