@@ -44,7 +44,7 @@ const mockDescriptions = [
 
 function createMockDestination(id, name) {
   return {
-    id: id,
+    id: String(id),
     name: name,
     description: getRandomArrayElement(mockDescriptions),
     pictures: Array.from(
@@ -56,7 +56,7 @@ function createMockDestination(id, name) {
 
 function createMockDestinations() {
   const destinations = new Map();
-  DESTINATIONS_TITLES.forEach((title, id) => destinations.set(id, createMockDestination(id, title)));
+  DESTINATIONS_TITLES.forEach((title, id) => destinations.set(String(id), createMockDestination(id, title)));
   return destinations;
 }
 
