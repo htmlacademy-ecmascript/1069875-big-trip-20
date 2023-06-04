@@ -76,8 +76,15 @@ function createDataListItemTemplate(title) {
 }
 
 function createFormTemplate({ event, destinationsNames }) {
-  const { type, dateFrom, dateTo, basePrice, typeOffers, offersSelection, destinationInfo } =
-    event;
+  const {
+    type,
+    dateFrom,
+    dateTo,
+    basePrice,
+    typeOffers,
+    offersSelection,
+    destinationInfo,
+  } = event;
 
   const dataListTemplate = Array.from(destinationsNames.keys())
     .map((name) => createDataListItemTemplate(name))
@@ -209,9 +216,11 @@ export default class FormView extends AbstractStatefulView {
     this.element
       .querySelector('.event__type-group')
       .addEventListener('change', this.#typeChangeHandler);
-    this.element
-      .querySelector('.event__available-offers')
-      .addEventListener('change', this.#offerClickHandler);
+    if (this._state.typeOffers.size) {
+      this.element
+        .querySelector('.event__available-offers')
+        .addEventListener('change', this.#offerClickHandler);
+    }
   }
 
   get template() {
@@ -277,7 +286,10 @@ export default class FormView extends AbstractStatefulView {
 
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
-    if (!this.#destinationsNames.has(evt.target.value)) {
+    if (
+      !this.#destinationsNames.has(evt.target.value) ||
+      evt.target.value === this._state.destinationInfo.name
+    ) {
       return;
     }
     this.updateElement({
@@ -289,6 +301,9 @@ export default class FormView extends AbstractStatefulView {
 
   #typeChangeHandler = (evt) => {
     evt.preventDefault();
+    if (evt.target.value === this._state.type) {
+      return;
+    }
     this.updateElement({
       type: evt.target.value,
       typeOffers: this.#offers.get(evt.target.value),
