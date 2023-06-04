@@ -1,5 +1,9 @@
 import { EVENTS_TYPES, EMPTY_EVENT, DateFormats } from '../const.js';
-import { startStringWithCapital, transformDate } from '../utils.js';
+import {
+  startStringWithCapital,
+  transformDate,
+  getChosenItemsMap,
+} from '../utils.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 
 function createTypesListItemTemplate(title) {
@@ -38,12 +42,13 @@ function createDestinationInfoTemplate(destination) {
           </section>`;
 }
 
-function createOffersItemTemplate({ offer, offerId }) {
-  const { title, price, isSelected } = offer;
+function createOffersItemTemplate({ offer, isSelected }) {
+  const { title, price, id } = offer;
   const selectedAttribute = isSelected ? 'checked' : '';
   return `<div class="event__offer-selector">
-            <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offerId}-1" type="checkbox" name="event-offer-${offerId}" ${selectedAttribute}>
-            <label class="event__offer-label" for="event-offer-${offerId}-1">
+            <input class="event__offer-checkbox  visually-hidden" id="event-offer-${id}-1" type="checkbox"
+              name="event-offer-${id}" ${selectedAttribute} data-offer-id="${id}">
+            <label class="event__offer-label" for="event-offer-${id}-1">
               <span class="event__offer-title">${title}</span>
               &plus;&euro;&nbsp;
               <span class="event__offer-price">${price}</span>
@@ -51,10 +56,13 @@ function createOffersItemTemplate({ offer, offerId }) {
           </div>`;
 }
 
-function createOffersTemplate({ typeOffers }) {
+function createOffersTemplate({ typeOffers, offersSelection }) {
   let offersItemsTemplate = '';
-  typeOffers.forEach((offer, offerId) => {
-    offersItemsTemplate += createOffersItemTemplate({ offer, offerId });
+  typeOffers.forEach((offer) => {
+    offersItemsTemplate += createOffersItemTemplate({
+      offer,
+      isSelected: offersSelection.get(offer.id),
+    });
   });
 
   return `<section class="event__section  event__section--offers">
@@ -68,14 +76,8 @@ function createDataListItemTemplate(title) {
 }
 
 function createFormTemplate({ event, destinationsNames }) {
-  const {
-    type,
-    dateFrom,
-    dateTo,
-    basePrice,
-    typeOffers,
-    destinationInfo,
-  } = event;
+  const { type, dateFrom, dateTo, basePrice, typeOffers, offersSelection, destinationInfo } =
+    event;
 
   const dataListTemplate = Array.from(destinationsNames.keys())
     .map((name) => createDataListItemTemplate(name))
@@ -86,7 +88,7 @@ function createFormTemplate({ event, destinationsNames }) {
   ).join('');
 
   const offersTemplate = typeOffers.size
-    ? createOffersTemplate({ typeOffers })
+    ? createOffersTemplate({ typeOffers, offersSelection })
     : '';
 
   const destinationInfoTemplate = destinationInfo.description
@@ -173,9 +175,9 @@ export default class FormView extends AbstractStatefulView {
     this.#offers = new Map(this.#offersModel.offers);
     this.#destinationsModel = destinationsModel;
     this.#destinations = new Map(this.#destinationsModel.destinations);
-    this.#destinationsNames = new Map(Array.from(this.#destinations.values()).map(
-      ({id, name}) => [name, id]
-    ));
+    this.#destinationsNames = new Map(
+      Array.from(this.#destinations.values()).map(({ id, name }) => [name, id])
+    );
     this._setState(
       FormView.parseEventToState({
         event,
@@ -198,31 +200,28 @@ export default class FormView extends AbstractStatefulView {
     this.element
       .querySelector('.event__input--destination')
       .addEventListener('change', this.#destinationChangeHandler);
+    this.element
+      .querySelector('.event__type-group')
+      .addEventListener('change', this.#typeChangeHandler);
+    this.element
+      .querySelector('.event__available-offers')
+      .addEventListener('change', this.#offerClickHandler);
   }
 
   get template() {
-    return createFormTemplate({ event: this._state, destinationsNames: this.#destinationsNames });
-  }
-
-  static parseOffersMap({ allOffers, type, chosenOffers = [] }) {
-    const typeOffers = allOffers.get(type);
-    if (!typeOffers.size) {
-      return new Map();
-    }
-    const offers = new Map(typeOffers);
-    offers.forEach((info, id) => {
-      info.isSelected = chosenOffers.includes(id);
+    return createFormTemplate({
+      event: this._state,
+      destinationsNames: this.#destinationsNames,
     });
-    return offers;
   }
 
   static parseEventToState({ event, offers, destinations }) {
     const state = { ...event };
-    state.typeOffers = FormView.parseOffersMap({
-      allOffers: offers,
-      type: state.type,
-      chosenOffers: state.offers,
-    });
+    state.typeOffers = new Map(offers.get(state.type));
+    state.offersSelection = getChosenItemsMap(
+      Array.from(state.typeOffers.keys()),
+      state.offers
+    );
     state.destinationInfo = destinations.get(state.destination);
 
     return state;
@@ -231,7 +230,14 @@ export default class FormView extends AbstractStatefulView {
   static parseStateToEvent(state) {
     const event = { ...state };
     event.destination = event.destinationInfo.id;
+    event.offers = [];
+    event.offersSelection.forEach((value, id) => {
+      if (value) {
+        event.offers.push(id);
+      }
+    });
     delete event.typeOffers;
+    delete event.offersSelection;
     delete event.destinationInfo;
 
     return event;
@@ -248,12 +254,33 @@ export default class FormView extends AbstractStatefulView {
   };
 
   #destinationChangeHandler = (evt) => {
+    evt.preventDefault();
     if (!this.#destinationsNames.has(evt.target.value)) {
       return;
     }
     this.updateElement({
       destinationInfo: this.#destinations.get(
         this.#destinationsNames.get(evt.target.value)
+      ),
+    });
+  };
+
+  #typeChangeHandler = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      type: evt.target.value,
+      typeOffers: this.#offers.get(evt.target.value),
+      offersSelection: getChosenItemsMap(Array.from(this._state.typeOffers.keys())),
+    });
+  };
+
+  #offerClickHandler = (evt) => {
+    evt.preventDefault();
+    const offerId = evt.target.dataset.offerId;
+    this._setState({
+      offersSelection: this._state.offersSelection.set(
+        offerId,
+        !this._state.offersSelection.get(offerId)
       ),
     });
   };
