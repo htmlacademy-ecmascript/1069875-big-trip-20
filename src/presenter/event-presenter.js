@@ -1,5 +1,5 @@
 import EventView from '../view/event-view.js';
-import FormPresenter from './form-presenter.js';
+import FormView from '../view/form-view.js';
 import { render, replace, remove } from '../framework/render.js';
 import { isKeyEscape } from '../utils.js';
 
@@ -15,7 +15,7 @@ export default class EventPresenter {
   #mode = Mode.DEFAULT;
 
   #eventComponent = null;
-  #formPresenter = null;
+  #formComponent = null;
 
   #offersModel = null;
   #destinationsModel = null;
@@ -45,7 +45,7 @@ export default class EventPresenter {
     ).name;
 
     const prevEventComponent = this.#eventComponent;
-    const prevFormPresenter = this.#formPresenter;
+    const prevFormComponent = this.#formComponent;
 
     this.#eventComponent = new EventView({
       event: this.#event,
@@ -55,7 +55,7 @@ export default class EventPresenter {
       onFavoriteClick: this.#handleFavoriteClick,
     });
 
-    this.#formPresenter = new FormPresenter({
+    this.#formComponent = new FormView({
       event: this.#event,
       offersModel: this.#offersModel,
       destinationsModel: this.#destinationsModel,
@@ -64,7 +64,7 @@ export default class EventPresenter {
       onFormSubmit: this.#handleFormSubmit,
     });
 
-    if (prevEventComponent === null || prevFormPresenter === null) {
+    if (prevEventComponent === null || prevFormComponent === null) {
       render(this.#eventComponent, this.#container);
       return;
     }
@@ -74,19 +74,16 @@ export default class EventPresenter {
     }
 
     if (this.#mode === Mode.EDITING) {
-      replace(
-        this.#formPresenter.formComponent,
-        prevFormPresenter.formComponent
-      );
+      replace(this.#formComponent, prevFormComponent);
     }
 
     remove(prevEventComponent);
-    remove(prevFormPresenter.formComponent);
+    remove(prevFormComponent);
   }
 
   destroy() {
     remove(this.#eventComponent);
-    remove(this.#formPresenter.formComponent);
+    remove(this.#formComponent);
   }
 
   resetView() {
@@ -96,13 +93,13 @@ export default class EventPresenter {
   }
 
   #switchEventToForm() {
-    replace(this.#formPresenter.formComponent, this.#eventComponent);
+    replace(this.#formComponent, this.#eventComponent);
     this.#handleModeChange();
     this.#mode = Mode.EDITING;
   }
 
   #switchFormToEvent() {
-    replace(this.#eventComponent, this.#formPresenter.formComponent);
+    replace(this.#eventComponent, this.#formComponent);
     this.#mode = Mode.DEFAULT;
   }
 
