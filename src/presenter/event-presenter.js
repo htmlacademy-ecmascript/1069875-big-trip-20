@@ -1,5 +1,5 @@
 import EventView from '../view/event-view.js';
-import FormPresenter from './form-presenter.js';
+import FormView from '../view/form-view.js';
 import { render, replace, remove } from '../framework/render.js';
 import { isKeyEscape } from '../utils.js';
 
@@ -15,52 +15,57 @@ export default class EventPresenter {
   #mode = Mode.DEFAULT;
 
   #eventComponent = null;
-  #formPresenter = null;
+  #formComponent = null;
 
-  #offers = null;
-  #destinations = null;
+  #offersModel = null;
+  #destinationsModel = null;
 
   #handleEventChange = null;
   #handleModeChange = null;
 
   constructor({
     container,
-    offers,
-    destinations,
+    offersModel,
+    destinationsModel,
     onEventChange,
     onModeChange,
   }) {
     this.#container = container;
-    this.#offers = offers;
-    this.#destinations = destinations;
+    this.#offersModel = offersModel;
+    this.#destinationsModel = destinationsModel;
     this.#handleEventChange = onEventChange;
     this.#handleModeChange = onModeChange;
   }
 
   init(event) {
     this.#event = event;
-    const typeOffers = this.#offers.get(event.type);
+    const typeOffers = this.#offersModel.offers.get(event.type);
+    const destinationName = this.#destinationsModel.destinations.get(
+      event.destination
+    ).name;
 
     const prevEventComponent = this.#eventComponent;
-    const prevFormPresenter = this.#formPresenter;
+    const prevFormComponent = this.#formComponent;
 
     this.#eventComponent = new EventView({
       event: this.#event,
       typeOffers,
-      openForm: this.#handleOpenFormClick,
+      destinationName,
+      onFormOpen: this.#handleFormOpen,
       onFavoriteClick: this.#handleFavoriteClick,
     });
 
-    this.#formPresenter = new FormPresenter({
+    this.#formComponent = new FormView({
       event: this.#event,
-      typeOffers,
-      destinations: this.#destinations,
+      offersModel: this.#offersModel,
+      destinationsModel: this.#destinationsModel,
       container: this.#container,
-      closeForm: this.#handleCloseFormClick,
+      onFormClose: this.#handleFormClose,
       onFormSubmit: this.#handleFormSubmit,
+      onFormReset: this.#handleFormReset,
     });
 
-    if (prevEventComponent === null || prevFormPresenter === null) {
+    if (prevEventComponent === null || prevFormComponent === null) {
       render(this.#eventComponent, this.#container);
       return;
     }
@@ -70,35 +75,33 @@ export default class EventPresenter {
     }
 
     if (this.#mode === Mode.EDITING) {
-      replace(
-        this.#formPresenter.formComponent,
-        prevFormPresenter.formComponent
-      );
+      replace(this.#formComponent, prevFormComponent);
     }
 
     remove(prevEventComponent);
-    remove(prevFormPresenter.formComponent);
+    remove(prevFormComponent);
   }
 
   destroy() {
     remove(this.#eventComponent);
-    remove(this.#formPresenter.formComponent);
+    remove(this.#formComponent);
   }
 
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
-      this.#switchFormToEvent();
+      this.#handleFormReset();
+      this.#handleFormClose();
     }
   }
 
   #switchEventToForm() {
-    replace(this.#formPresenter.formComponent, this.#eventComponent);
+    replace(this.#formComponent, this.#eventComponent);
     this.#handleModeChange();
     this.#mode = Mode.EDITING;
   }
 
   #switchFormToEvent() {
-    replace(this.#eventComponent, this.#formPresenter.formComponent);
+    replace(this.#eventComponent, this.#formComponent);
     this.#mode = Mode.DEFAULT;
   }
 
@@ -107,18 +110,27 @@ export default class EventPresenter {
       return;
     }
     evt.preventDefault();
-    this.#switchFormToEvent();
-    document.removeEventListener('keydown', this.#escKeyDownHandler);
+    this.#handleFormReset();
+    this.#handleFormClose();
   };
 
-  #handleOpenFormClick = () => {
+  #handleFormOpen = () => {
     this.#switchEventToForm();
     document.addEventListener('keydown', this.#escKeyDownHandler);
   };
 
-  #handleCloseFormClick = () => {
+  #handleFormClose = () => {
     this.#switchFormToEvent();
     document.removeEventListener('keydown', this.#escKeyDownHandler);
+  };
+
+  #handleFormSubmit = (changedEvent) => {
+    this.#handleEventChange(changedEvent);
+    this.#handleFormClose();
+  };
+
+  #handleFormReset = () => {
+    this.#formComponent.reset(this.#event);
   };
 
   #handleFavoriteClick = () => {
@@ -126,10 +138,5 @@ export default class EventPresenter {
       ...this.#event,
       isFavorite: !this.#event.isFavorite,
     });
-  };
-
-  #handleFormSubmit = (changedEvent) => {
-    this.#handleEventChange(changedEvent);
-    this.#handleCloseFormClick();
   };
 }

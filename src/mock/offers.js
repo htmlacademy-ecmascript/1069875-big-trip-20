@@ -18,7 +18,8 @@ function createMockOffers() {
   const offers = new Map();
 
   for (let i = 1; i <= OFFERS_NUMBER; i ++) {
-    offers.set(i, {
+    offers.set(String(i), {
+      id: String(i),
       title: getRandomArrayElement(OFFERS_TITLES),
       price: getRandomArrayElement(OFFERS_PRICES),
     });
