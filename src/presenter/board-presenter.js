@@ -3,7 +3,7 @@ import NoEventsView from '../view/no-events-view.js';
 import SortingView from '../view/sorting-view.js';
 import EventPresenter from './event-presenter.js';
 import { render, remove } from '../framework/render.js';
-import { NoEventsMessages, SortingNames } from '../const.js';
+import { NoEventsMessages, SortingNames, UpdateType, UserAction } from '../const.js';
 import { sortByTime, sortByPrice } from '../utils.js';
 
 export default class BoardPresenter {
@@ -26,6 +26,8 @@ export default class BoardPresenter {
     this.#eventsModel = eventsModel;
     this.#offersModel = offersModel;
     this.#destinationsModel = destinationsModel;
+
+    this.#eventsModel.addObserver(this.#handleModelEvent);
   }
 
   init() {
@@ -69,6 +71,7 @@ export default class BoardPresenter {
         this.#clearEventsList();
       }
     }
+    this.#currentSorting = SortingNames.DAY;
   }
 
   #renderNoEvents(message) {
@@ -81,6 +84,7 @@ export default class BoardPresenter {
 
   #renderSorting() {
     this.#sortingComponent = new SortingView({
+      defaultSorting: this.#currentSorting,
       onSortingClick: this.#handleSortingClick,
     });
     render(this.#sortingComponent, this.#container);
@@ -110,7 +114,7 @@ export default class BoardPresenter {
       container: this.#eventsListComponent.element,
       offersModel: this.#offersModel,
       destinationsModel: this.#destinationsModel,
-      onEventChange: this.#handleEventChange,
+      onEventChange: this.#handleViewAction,
       onModeChange: this.#handleModeChange,
     });
     eventPresenter.init(event);
@@ -126,12 +130,37 @@ export default class BoardPresenter {
     this.#renderEvents();
   };
 
-  #handleEventChange = (updatedEvent) => {
-    //
-    this.#eventsPresenters.get(updatedEvent.id).init(updatedEvent);
-  };
-
   #handleModeChange = () => {
     this.#eventsPresenters.forEach((presenter) => presenter.resetView());
+  };
+
+  #handleViewAction = (actionType, updateType, update) => {
+    switch (actionType) {
+      case UserAction.UPDATE_EVENT:
+        this.#eventsModel.updateEvent(updateType, update);
+        break;
+      case UserAction.ADD_EVENT:
+        this.#eventsModel.addEvent(updateType, update);
+        break;
+      case UserAction.DELETE_EVENT:
+        this.#eventsModel.removeEvent(updateType, update);
+        break;
+    }
+  };
+
+  #handleModelEvent = (updateType, update) => {
+    switch (updateType) {
+      case UpdateType.PATCH:
+        this.#eventsPresenters.get(update.id).init(update);
+        break;
+      case UpdateType.MINOR:
+        this.#clearEventsList();
+        this.#renderEvents();
+        break;
+      case UpdateType.MAJOR:
+        this.#clearBoard();
+        this.#renderBoard();
+        break;
+    }
   };
 }

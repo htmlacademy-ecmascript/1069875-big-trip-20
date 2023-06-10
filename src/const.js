@@ -58,6 +58,18 @@ const EMPTY_EVENT = {
   isFavorite: false,
 };
 
+const UserAction = {
+  UPDATE_EVENT: 'UPDATE_EVENT',
+  ADD_EVENT: 'ADD_EVENT',
+  DELETE_EVENT: 'DELETE_EVENT',
+};
+
+const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR',
+};
+
 export {
   EVENTS_TYPES,
   FiltersNames,
@@ -67,4 +79,6 @@ export {
   DateFormats,
   DurationFormats,
   EMPTY_EVENT,
+  UserAction,
+  UpdateType,
 };

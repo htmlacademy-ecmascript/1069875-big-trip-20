@@ -2,6 +2,7 @@ import EventView from '../view/event-view.js';
 import FormView from '../view/form-view.js';
 import { render, replace, remove } from '../framework/render.js';
 import { isKeyEscape } from '../utils.js';
+import { UserAction, UpdateType } from '../const.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -125,7 +126,11 @@ export default class EventPresenter {
   };
 
   #handleFormSubmit = (changedEvent) => {
-    this.#handleEventChange(changedEvent);
+    this.#handleEventChange(
+      UserAction.UPDATE_EVENT,
+      UpdateType.MINOR,
+      changedEvent
+    );
     this.#handleFormClose();
   };
 
@@ -134,7 +139,7 @@ export default class EventPresenter {
   };
 
   #handleFavoriteClick = () => {
-    this.#handleEventChange({
+    this.#handleEventChange(UserAction.UPDATE_EVENT, UpdateType.PATCH, {
       ...this.#event,
       isFavorite: !this.#event.isFavorite,
     });

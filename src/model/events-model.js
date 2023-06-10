@@ -17,7 +17,7 @@ export default class EventsModel extends Observable {
 
   updateEvent(updateType, update) {
     if (!this.#events.has(update.id)) {
-      throw new Error('Can\'t update unexisting task');
+      throw new Error('Can\'t update nonexisting task');
     }
     this.#events.set(update.id, update);
     this._notify(updateType, update);
@@ -30,7 +30,7 @@ export default class EventsModel extends Observable {
 
   removeEvent(updateType, update) {
     if (!this.#events.has(update.id)) {
-      throw new Error('Can\'t delete unexisting task');
+      throw new Error('Can\'t delete nonexisting task');
     }
     this.#events.delete(update.id);
     this._notify(updateType, update);
