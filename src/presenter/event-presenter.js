@@ -1,7 +1,7 @@
 import EventView from '../view/event-view.js';
 import FormView from '../view/form-view.js';
 import { render, replace, remove } from '../framework/render.js';
-import { isKeyEscape } from '../utils.js';
+import { isKeyEscape, isDatesEqual, getDuration } from '../utils.js';
 import { UserAction, UpdateType } from '../const.js';
 
 const Mode = {
@@ -126,9 +126,15 @@ export default class EventPresenter {
   };
 
   #handleFormSubmit = (changedEvent) => {
+    const isMinorUpdate =
+      !isDatesEqual(this.#event.dateFrom, changedEvent.dateFrom) ||
+      this.#event.basePrice !== changedEvent.basePrice ||
+      getDuration(this.#event.dateFrom, this.#event.dateTo) !==
+        getDuration(changedEvent.dateFrom, changedEvent.dateTo);
+
     this.#handleEventChange(
       UserAction.UPDATE_EVENT,
-      UpdateType.MINOR,
+      isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       changedEvent
     );
     this.#handleFormClose();

@@ -20,6 +20,10 @@ function transformDate(date, format) {
   return dayjs(date).format(format);
 }
 
+function isDatesEqual(dateA, dateB) {
+  return dayjs(dateA).isSame(dateB, 'day');
+}
+
 function calculateDuration(timeFrom, timeTo) {
   return dayjs.duration(dayjs(timeTo).diff(timeFrom));
 }
@@ -94,6 +98,7 @@ export {
   getRandomNumber,
   getRandomArrayElement,
   transformDate,
+  isDatesEqual,
   getDuration,
   startStringWithCapital,
   isKeyEscape,
