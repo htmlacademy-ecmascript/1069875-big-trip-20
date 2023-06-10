@@ -3,9 +3,12 @@ import { getRandomEvent } from '../mock/event.js';
 const EVENTS_NUMBER = 5;
 
 export default class EventsModel {
-  #events = Array.from({ length: EVENTS_NUMBER }, getRandomEvent);
+  #events = new Map(
+    Array.from({ length: EVENTS_NUMBER }, getRandomEvent)
+      .map((event) => [event.id, event])
+  );
 
   get events() {
-    return this.#events;
+    return Array.from(this.#events.values());
   }
 }

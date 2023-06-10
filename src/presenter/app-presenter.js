@@ -3,7 +3,7 @@ import OffersModel from '../model/offers-model.js';
 import DestinationsModel from '../model/destinations-model.js';
 import TripInfoView from '../view/trip-info-view.js';
 import FiltersPresenter from './filters-presenter.js';
-import EventsListPresenter from './events-list-presenter.js';
+import BoardPresenter from './board-presenter.js';
 import { getFilters } from '../mock/filters.js';
 import { render, RenderPosition } from '../framework/render.js';
 
@@ -30,7 +30,7 @@ export default class AppPresenter {
   init() {
     this.#renderTripInfo();
     this.#renderFilters();
-    this.#renderEventsList();
+    this.#renderBoard();
   }
 
   #renderTripInfo() {
@@ -49,8 +49,8 @@ export default class AppPresenter {
     this.#filtersComponent.init();
   }
 
-  #renderEventsList() {
-    this.#eventsComponent = new EventsListPresenter({
+  #renderBoard() {
+    this.#eventsComponent = new BoardPresenter({
       container: this.#siteMainElement,
       eventsModel: this.#eventsModel,
       offersModel: this.#offersModel,
