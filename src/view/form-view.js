@@ -170,9 +170,9 @@ export default class FormView extends AbstractStatefulView {
   #destinations = null;
   #destinationsNames = null;
 
-  #handleCloseForm = null;
   #handleFormSubmit = null;
   #handleFormReset = null;
+  #handleResetButton = null;
 
   #datepickerFrom = null;
   #datepickerTo = null;
@@ -181,9 +181,9 @@ export default class FormView extends AbstractStatefulView {
     event = EMPTY_EVENT,
     offersModel,
     destinationsModel,
-    onFormClose,
     onFormSubmit,
     onFormReset,
+    onResetButtonClick = null,
   }) {
     super();
     this.#offersModel = offersModel;
@@ -200,9 +200,9 @@ export default class FormView extends AbstractStatefulView {
         destinations: this.#destinations,
       })
     );
-    this.#handleCloseForm = onFormClose;
     this.#handleFormSubmit = onFormSubmit;
     this.#handleFormReset = onFormReset;
+    this.#handleResetButton = onResetButtonClick ?? this.#handleFormReset;
     this._restoreHandlers();
   }
 
@@ -295,13 +295,12 @@ export default class FormView extends AbstractStatefulView {
 
   #resetBtnClickHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormReset();
+    this.#handleResetButton();
   };
 
   #closeBtnClickHandler = (evt) => {
     evt.preventDefault();
     this.#handleFormReset();
-    this.#handleCloseForm();
   };
 
   #destinationChangeHandler = (evt) => {
