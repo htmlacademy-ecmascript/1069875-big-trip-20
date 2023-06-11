@@ -2,14 +2,15 @@ import EventsListView from '../view/events-list-view.js';
 import NoEventsView from '../view/no-events-view.js';
 import SortingView from '../view/sorting-view.js';
 import EventPresenter from './event-presenter.js';
+import NewEventPresenter from './new-event-presenter.js';
 import { render, remove } from '../framework/render.js';
-import { SortingNames, UpdateType, UserAction } from '../const.js';
+import { SortingNames, FiltersNames, UpdateType, UserAction } from '../const.js';
 import { filtersFunctions, sortByTime, sortByPrice } from '../utils.js';
 
 export default class BoardPresenter {
   #container = null;
 
-  #eventsListComponent = null;
+  #eventsListComponent = new EventsListView();
   #sortingComponent = null;
   #noEventsComponent = null;
 
@@ -19,6 +20,7 @@ export default class BoardPresenter {
   #filterModel = null;
 
   #eventsPresenters = new Map();
+  #newEventPresenter = null;
 
   #currentSorting = SortingNames.DAY;
 
@@ -30,12 +32,22 @@ export default class BoardPresenter {
     offersModel,
     destinationsModel,
     filterModel,
+    onNewEventDestroy,
   }) {
     this.#container = container;
     this.#eventsModel = eventsModel;
     this.#offersModel = offersModel;
     this.#destinationsModel = destinationsModel;
     this.#filterModel = filterModel;
+
+    this.#newEventPresenter = new NewEventPresenter({
+      container: this.#eventsListComponent.element,
+      offersModel: this.#offersModel,
+      destinationsModel: this.#destinationsModel,
+      onDataChange: this.#handleViewAction,
+      onDestroy: onNewEventDestroy,
+    });
+
     this.#eventsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
   }
@@ -78,12 +90,9 @@ export default class BoardPresenter {
       remove(this.#sortingComponent);
       this.#sortingComponent = null;
     }
-    if (this.#eventsListComponent) {
-      remove(this.#eventsListComponent);
-      this.#eventsListComponent = null;
-      if (this.#eventsPresenters.size) {
-        this.#clearEventsList();
-      }
+
+    if (this.#eventsPresenters.size) {
+      this.#clearEventsList();
     }
     this.#currentSorting = SortingNames.DAY;
   }
@@ -92,7 +101,9 @@ export default class BoardPresenter {
     if (this.#noEventsComponent) {
       remove(this.#noEventsComponent);
     }
-    this.#noEventsComponent = new NoEventsView({ currentFilter: this.#filterModel.filter });
+    this.#noEventsComponent = new NoEventsView({
+      currentFilter: this.#filterModel.filter,
+    });
     render(this.#noEventsComponent, this.#container);
   }
 
@@ -105,12 +116,12 @@ export default class BoardPresenter {
   }
 
   #renderEventsList() {
-    this.#eventsListComponent = new EventsListView();
     render(this.#eventsListComponent, this.#container);
     this.#renderEvents();
   }
 
   #clearEventsList() {
+    this.#newEventPresenter.destroy();
     this.#eventsPresenters.forEach((presenter) => presenter.destroy());
     this.#eventsPresenters.clear();
   }
@@ -132,6 +143,12 @@ export default class BoardPresenter {
     this.#eventsPresenters.set(event.id, eventPresenter);
   }
 
+  createEvent() {
+    this.#currentSorting = SortingNames.DAY;
+    this.#filterModel.setFilter(UpdateType.MAJOR, FiltersNames.ALL);
+    this.#newEventPresenter.init();
+  }
+
   #handleSortingClick = (sortType) => {
     if (sortType === this.#currentSorting) {
       return;
@@ -142,6 +159,7 @@ export default class BoardPresenter {
   };
 
   #handleModeChange = () => {
+    this.#newEventPresenter.destroy();
     this.#eventsPresenters.forEach((presenter) => presenter.resetView());
   };
 

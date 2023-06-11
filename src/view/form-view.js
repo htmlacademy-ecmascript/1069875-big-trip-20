@@ -126,7 +126,7 @@ function createFormTemplate({ event, destinationsNames }) {
                     ${startStringWithCapital(type)}
                   </label>
                   <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination"
-                    value="${destinationInfo.name}" list="destination-list-1">
+                    value="${destinationInfo.name ? destinationInfo.name : ''}" list="destination-list-1">
                   <datalist id="destination-list-1">${dataListTemplate}</datalist>
                 </div>
 
@@ -257,7 +257,7 @@ export default class FormView extends AbstractStatefulView {
       Array.from(state.typeOffers.keys()),
       state.offers
     );
-    state.destinationInfo = destinations.get(state.destination);
+    state.destinationInfo = state.destination ? destinations.get(state.destination) : {};
 
     return state;
   }
