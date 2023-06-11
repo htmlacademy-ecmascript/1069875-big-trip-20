@@ -4,7 +4,7 @@ import SortingView from '../view/sorting-view.js';
 import EventPresenter from './event-presenter.js';
 import { render, remove } from '../framework/render.js';
 import { NoEventsMessages, SortingNames, UpdateType, UserAction } from '../const.js';
-import { sortByTime, sortByPrice } from '../utils.js';
+import { filtersFunctions, sortByTime, sortByPrice } from '../utils.js';
 
 export default class BoardPresenter {
   #container = null;
@@ -16,18 +16,26 @@ export default class BoardPresenter {
   #eventsModel = null;
   #offersModel = null;
   #destinationsModel = null;
+  #filterModel = null;
 
   #eventsPresenters = new Map();
 
   #currentSorting = SortingNames.DAY;
 
-  constructor({ container, eventsModel, offersModel, destinationsModel }) {
+  constructor({
+    container,
+    eventsModel,
+    offersModel,
+    destinationsModel,
+    filterModel,
+  }) {
     this.#container = container;
     this.#eventsModel = eventsModel;
     this.#offersModel = offersModel;
     this.#destinationsModel = destinationsModel;
-
+    this.#filterModel = filterModel;
     this.#eventsModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   init() {
@@ -35,14 +43,17 @@ export default class BoardPresenter {
   }
 
   get events() {
+    const filter = this.#filterModel.filter;
+    const filteredEvents = filtersFunctions[filter](this.#eventsModel.events);
+
     switch (this.#currentSorting) {
       case SortingNames.TIME:
-        return this.#eventsModel.events.sort(sortByTime);
+        return filteredEvents.sort(sortByTime);
       case SortingNames.PRICE:
-        return this.#eventsModel.events.sort(sortByPrice);
+        return filteredEvents.sort(sortByPrice);
     }
 
-    return this.#eventsModel.events;
+    return filteredEvents;
   }
 
   #renderBoard() {
