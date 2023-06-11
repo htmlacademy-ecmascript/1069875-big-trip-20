@@ -37,7 +37,7 @@ const DateFormats = {
   FOR_FORM: 'DD/MM/YY h:mm',
   FULL: 'YYYY-MM-DDTHH:mm',
   DAY_MACHINE: 'YYYY-MM-DD',
-  DAY_HUMAN: 'D MMMM',
+  DAY_HUMAN: 'MMM D',
   TIME: 'h:mm',
   FLATPICKR: 'd/m/y H:i',
 };
