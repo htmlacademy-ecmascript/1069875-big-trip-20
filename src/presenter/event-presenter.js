@@ -24,18 +24,22 @@ export default class EventPresenter {
   #handleEventChange = null;
   #handleModeChange = null;
 
+  #isOnlyOneShowing = null;
+
   constructor({
     container,
     offersModel,
     destinationsModel,
     onEventChange,
     onModeChange,
+    isOnlyOneShowing,
   }) {
     this.#container = container;
     this.#offersModel = offersModel;
     this.#destinationsModel = destinationsModel;
     this.#handleEventChange = onEventChange;
     this.#handleModeChange = onModeChange;
+    this.#isOnlyOneShowing = isOnlyOneShowing;
   }
 
   init(event) {
@@ -143,7 +147,7 @@ export default class EventPresenter {
   #handleEventDelete = () => {
     this.#handleEventChange(
       UserAction.DELETE_EVENT,
-      UpdateType.MINOR,
+      this.#isOnlyOneShowing ? UpdateType.MINOR : UpdateType.MAJOR,
       this.#event
     );
     this.#handleFormClose();

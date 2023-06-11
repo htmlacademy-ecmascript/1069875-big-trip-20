@@ -26,10 +26,10 @@ const SortingNames = {
 const EVENT_ITEMS = ['day', 'event', 'time', 'price', 'offers'];
 
 const NoEventsMessages = {
-  ALL: 'Click New Event to create your first point',
-  FUTURE: 'There are no future events now',
-  PRESENT: 'There are no present events now',
-  PAST: 'There are no past events now',
+  [FiltersNames.ALL]: 'Click New Event to create your first point',
+  [FiltersNames.FUTURE]: 'There are no future events now',
+  [FiltersNames.PRESENT]: 'There are no present events now',
+  [FiltersNames.PAST]: 'There are no past events now',
 };
 
 

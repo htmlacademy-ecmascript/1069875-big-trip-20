@@ -3,7 +3,7 @@ import NoEventsView from '../view/no-events-view.js';
 import SortingView from '../view/sorting-view.js';
 import EventPresenter from './event-presenter.js';
 import { render, remove } from '../framework/render.js';
-import { NoEventsMessages, SortingNames, UpdateType, UserAction } from '../const.js';
+import { SortingNames, UpdateType, UserAction } from '../const.js';
 import { filtersFunctions, sortByTime, sortByPrice } from '../utils.js';
 
 export default class BoardPresenter {
@@ -21,6 +21,8 @@ export default class BoardPresenter {
   #eventsPresenters = new Map();
 
   #currentSorting = SortingNames.DAY;
+
+  #showingEventsNumber = 0;
 
   constructor({
     container,
@@ -45,6 +47,7 @@ export default class BoardPresenter {
   get events() {
     const filter = this.#filterModel.filter;
     const filteredEvents = filtersFunctions[filter](this.#eventsModel.events);
+    this.#showingEventsNumber = filteredEvents.length;
 
     switch (this.#currentSorting) {
       case SortingNames.TIME:
@@ -58,7 +61,7 @@ export default class BoardPresenter {
 
   #renderBoard() {
     if (!this.events.length) {
-      this.#renderNoEvents(NoEventsMessages.ALL);
+      this.#renderNoEvents();
       return;
     }
 
@@ -85,12 +88,12 @@ export default class BoardPresenter {
     this.#currentSorting = SortingNames.DAY;
   }
 
-  #renderNoEvents(message) {
+  #renderNoEvents() {
     if (this.#noEventsComponent) {
       remove(this.#noEventsComponent);
     }
-    this.#noEventsComponent = new NoEventsView({ message });
-    render(this.#noEventsComponent, this.#eventsListComponent.element);
+    this.#noEventsComponent = new NoEventsView({ currentFilter: this.#filterModel.filter });
+    render(this.#noEventsComponent, this.#container);
   }
 
   #renderSorting() {
@@ -113,10 +116,6 @@ export default class BoardPresenter {
   }
 
   #renderEvents() {
-    if (!this.events.length) {
-      this.#renderNoEvents(NoEventsMessages.ALL);
-      return;
-    }
     this.events.forEach((event) => this.#renderEvent(event));
   }
 
@@ -127,6 +126,7 @@ export default class BoardPresenter {
       destinationsModel: this.#destinationsModel,
       onEventChange: this.#handleViewAction,
       onModeChange: this.#handleModeChange,
+      isOnlyOneShowing: this.#showingEventsNumber > 1,
     });
     eventPresenter.init(event);
     this.#eventsPresenters.set(event.id, eventPresenter);
