@@ -95,7 +95,6 @@ export default class EventPresenter {
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
       this.#handleFormReset();
-      this.#handleFormClose();
     }
   }
 
@@ -116,7 +115,6 @@ export default class EventPresenter {
     }
     evt.preventDefault();
     this.#handleFormReset();
-    this.#handleFormClose();
   };
 
   #handleFormOpen = () => {
