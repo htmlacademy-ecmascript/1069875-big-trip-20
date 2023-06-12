@@ -1,3 +1,4 @@
+import he from 'he';
 import { EVENTS_TYPES, EMPTY_EVENT, DateFormats } from '../const.js';
 import {
   startStringWithCapital,
@@ -130,7 +131,7 @@ function createFormTemplate({ event, destinationsNames }) {
                     ${startStringWithCapital(type)}
                   </label>
                   <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination"
-                    value="${destinationInfo.name ? destinationInfo.name : ''}" list="destination-list-1"
+                    value="${destinationInfo.name ? he.encode(destinationInfo.name) : ''}" list="destination-list-1"
                     pattern="${destinationInputPattern}"
                     oninvalid="this.setCustomValidity('Пожалуйста, выберите пункт назначения из предложенного списка')" onchange="this.setCustomValidity('')" required>
                   <datalist id="destination-list-1">${dataListTemplate}</datalist>
@@ -152,7 +153,7 @@ function createFormTemplate({ event, destinationsNames }) {
                     &euro;
                   </label>
                   <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price"
-                    value="${basePrice}" pattern="^[1-9]&bsol;d*$" required
+                    value="${he.encode(String(basePrice))}" pattern="^[1-9]&bsol;d*$" required
                     oninvalid="this.setCustomValidity('Пожалуйста, введите целое положительное число')" onchange="this.setCustomValidity('')">
                 </div>
 
@@ -283,6 +284,7 @@ export default class FormView extends AbstractStatefulView {
         event.offers.push(id);
       }
     });
+    event.basePrice = Number(event.basePrice);
     delete event.typeOffers;
     delete event.offersSelection;
     delete event.destinationInfo;
