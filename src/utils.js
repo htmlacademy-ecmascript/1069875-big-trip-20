@@ -20,6 +20,10 @@ function transformDate(date, format) {
   return dayjs(date).format(format);
 }
 
+function isDatesEqual(dateA, dateB) {
+  return dayjs(dateA).isSame(dateB, 'day');
+}
+
 function calculateDuration(timeFrom, timeTo) {
   return dayjs.duration(dayjs(timeTo).diff(timeFrom));
 }
@@ -55,17 +59,17 @@ function isKeyEscape(evt) {
 }
 
 const filtersFunctions = {
-  [FiltersNames.ALL]: (event) => event,
-  [FiltersNames.FUTURE]: (event) =>
-    event.filter(({ dateFrom }) => dayjs(dateFrom).isAfter(dayjs(), 'day')),
-  [FiltersNames.PRESENT]: (event) =>
-    event.filter(
+  [FiltersNames.ALL]: (events) => events,
+  [FiltersNames.FUTURE]: (events) =>
+    events.filter(({ dateFrom }) => dayjs(dateFrom).isAfter(dayjs(), 'day')),
+  [FiltersNames.PRESENT]: (events) =>
+    events.filter(
       ({ dateFrom, dateTo }) =>
         dayjs(dateFrom).isSameOrBefore(dayjs(), 'day') &&
         dayjs(dateTo).isSameOrAfter(dayjs(), 'day')
     ),
-  [FiltersNames.PAST]: (event) =>
-    event.filter(({ dateTo }) => dayjs(dateTo).isBefore(dayjs(), 'day')),
+  [FiltersNames.PAST]: (events) =>
+    events.filter(({ dateTo }) => dayjs(dateTo).isBefore(dayjs(), 'day')),
 };
 
 function sortByTime(itemA, itemB) {
@@ -76,12 +80,6 @@ function sortByTime(itemA, itemB) {
 
 function sortByPrice(itemA, itemB) {
   return itemB.basePrice - itemA.basePrice;
-}
-
-function sortMap(map, sortingFn) {
-  return new Map(
-    [...map].sort((itemA, itemB) => sortingFn(itemA[1], itemB[1]))
-  );
 }
 
 function getChosenItemsMap(items, chosenItems = []) {
@@ -100,12 +98,12 @@ export {
   getRandomNumber,
   getRandomArrayElement,
   transformDate,
+  isDatesEqual,
   getDuration,
   startStringWithCapital,
   isKeyEscape,
   filtersFunctions,
   sortByTime,
   sortByPrice,
-  sortMap,
   getChosenItemsMap,
 };

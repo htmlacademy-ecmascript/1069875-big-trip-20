@@ -1,10 +1,11 @@
 import EventsModel from '../model/events-model.js';
 import OffersModel from '../model/offers-model.js';
 import DestinationsModel from '../model/destinations-model.js';
+import FilterModel from '../model/filter-model.js';
 import TripInfoView from '../view/trip-info-view.js';
+import NewEventButtonView from '../view/new-event-button-view.js';
 import FiltersPresenter from './filters-presenter.js';
-import EventsListPresenter from './events-list-presenter.js';
-import { getFilters } from '../mock/filters.js';
+import BoardPresenter from './board-presenter.js';
 import { render, RenderPosition } from '../framework/render.js';
 
 export default class AppPresenter {
@@ -12,14 +13,14 @@ export default class AppPresenter {
   #filtersElement = null;
   #siteMainElement = null;
 
-  #filtersComponent = null;
-  #eventsComponent = null;
+  #filtersPresenter = null;
+  #boardPresenter = null;
+  #newEventButtonComponent = null;
 
   #eventsModel = new EventsModel();
   #offersModel = new OffersModel();
   #destinationsModel = new DestinationsModel();
-
-  #filters = getFilters(this.#eventsModel.events);
+  #filterModel = new FilterModel();
 
   constructor({ tripMainElement, filtersElement, siteMainElement }) {
     this.#tripMainElement = tripMainElement;
@@ -30,7 +31,9 @@ export default class AppPresenter {
   init() {
     this.#renderTripInfo();
     this.#renderFilters();
-    this.#renderEventsList();
+    this.#renderBoard();
+    this.#newEventButtonComponent = new NewEventButtonView({ onClick: this.#handleNewEventButtonClick });
+    render(this.#newEventButtonComponent, this.#tripMainElement);
   }
 
   #renderTripInfo() {
@@ -42,20 +45,32 @@ export default class AppPresenter {
   }
 
   #renderFilters() {
-    this.#filtersComponent = new FiltersPresenter({
+    this.#filtersPresenter = new FiltersPresenter({
       container: this.#filtersElement,
-      filters: this.#filters,
+      filterModel: this.#filterModel,
+      eventsModel: this.#eventsModel,
     });
-    this.#filtersComponent.init();
+    this.#filtersPresenter.init();
   }
 
-  #renderEventsList() {
-    this.#eventsComponent = new EventsListPresenter({
+  #renderBoard() {
+    this.#boardPresenter = new BoardPresenter({
       container: this.#siteMainElement,
       eventsModel: this.#eventsModel,
       offersModel: this.#offersModel,
       destinationsModel: this.#destinationsModel,
+      filterModel: this.#filterModel,
+      onNewEventDestroy: this.#handleNewEventFormClose,
     });
-    this.#eventsComponent.init();
+    this.#boardPresenter.init();
   }
+
+  #handleNewEventFormClose = () => {
+    this.#newEventButtonComponent.element.disabled = false;
+  };
+
+  #handleNewEventButtonClick = () => {
+    this.#boardPresenter.createEvent();
+    this.#newEventButtonComponent.element.disabled = true;
+  };
 }

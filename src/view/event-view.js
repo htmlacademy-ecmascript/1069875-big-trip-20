@@ -1,3 +1,4 @@
+import he from 'he';
 import { DateFormats } from '../const.js';
 import { transformDate, getDuration } from '../utils.js';
 import AbstractView from '../framework/view/abstract-view.js';
@@ -44,7 +45,7 @@ function createEventTemplate({ event, typeOffers, destinationName }) {
                 <div class="event__type">
                   <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
                 </div>
-                <h3 class="event__title">${type} ${destinationName}</h3>
+                <h3 class="event__title">${type} ${he.encode(destinationName)}</h3>
                 <div class="event__schedule">
                   <p class="event__time">
                     <time class="event__start-time"
@@ -60,7 +61,7 @@ function createEventTemplate({ event, typeOffers, destinationName }) {
                   <p class="event__duration">${duration}</p>
                 </div>
                 <p class="event__price">
-                  &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
+                  &euro;&nbsp;<span class="event__price-value">${he.encode(String(basePrice))}</span>
                 </p>
                   ${offersTemplate}
                 <button class="event__favorite-btn ${favoriteClass}" type="button">

@@ -1,3 +1,4 @@
+import he from 'he';
 import { EVENTS_TYPES, EMPTY_EVENT, DateFormats } from '../const.js';
 import {
   startStringWithCapital,
@@ -78,6 +79,15 @@ function createDataListItemTemplate(title) {
   return `<option value='${title}'></option>`;
 }
 
+function getControls({ isNewEvent }) {
+  return isNewEvent
+    ? '<button class="event__reset-btn" type="reset">Cancel</button>'
+    : `<button class="event__reset-btn" type="reset">Delete</button>
+       <button class="event__rollup-btn" type="button">
+         <span class="visually-hidden">Open event</span>
+       </button>`;
+}
+
 function createFormTemplate({ event, destinationsNames }) {
   const {
     type,
@@ -93,6 +103,10 @@ function createFormTemplate({ event, destinationsNames }) {
     .map((name) => createDataListItemTemplate(name))
     .join('');
 
+  const destinationInputPattern = `(${Array.from(destinationsNames.keys()).join(
+    ')|('
+  )})`;
+
   const typesListTemplate = EVENTS_TYPES.map((title) =>
     createTypesListItemTemplate(title)
   ).join('');
@@ -105,8 +119,10 @@ function createFormTemplate({ event, destinationsNames }) {
     ? createDestinationInfoTemplate(destinationInfo)
     : '';
 
+  const controls = getControls({ isNewEvent: !event.id });
+
   return `<li class="trip-events__item">
-            <form class="event event--edit" action="#" method="post">
+            <form class="event event--edit" action="#" method="post" autocomplete="off">
               <header class="event__header">
                 <div class="event__type-wrapper">
                   <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -126,7 +142,9 @@ function createFormTemplate({ event, destinationsNames }) {
                     ${startStringWithCapital(type)}
                   </label>
                   <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination"
-                    value="${destinationInfo.name}" list="destination-list-1">
+                    value="${destinationInfo.name ? he.encode(destinationInfo.name) : ''}" list="destination-list-1"
+                    pattern="${destinationInputPattern}"
+                    oninvalid="this.setCustomValidity('Пожалуйста, выберите пункт назначения из предложенного списка')" onchange="this.setCustomValidity('')" required>
                   <datalist id="destination-list-1">${dataListTemplate}</datalist>
                 </div>
 
@@ -145,14 +163,13 @@ function createFormTemplate({ event, destinationsNames }) {
                     <span class="visually-hidden">Price</span>
                     &euro;
                   </label>
-                  <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}">
+                  <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price"
+                    value="${he.encode(String(basePrice))}" pattern="^[1-9]&bsol;d*$" required
+                    oninvalid="this.setCustomValidity('Пожалуйста, введите целое положительное число')" onchange="this.setCustomValidity('')">
                 </div>
 
                 <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-                <button class="event__reset-btn" type="reset">Delete</button>
-                <button class="event__rollup-btn" type="button">
-                  <span class="visually-hidden">Open event</span>
-                </button>
+                ${controls}
               </header>
               <section class="event__details">
                 ${offersTemplate}
@@ -170,9 +187,9 @@ export default class FormView extends AbstractStatefulView {
   #destinations = null;
   #destinationsNames = null;
 
-  #handleCloseForm = null;
   #handleFormSubmit = null;
   #handleFormReset = null;
+  #handleResetButton = null;
 
   #datepickerFrom = null;
   #datepickerTo = null;
@@ -181,9 +198,9 @@ export default class FormView extends AbstractStatefulView {
     event = EMPTY_EVENT,
     offersModel,
     destinationsModel,
-    onFormClose,
     onFormSubmit,
     onFormReset,
+    onResetButtonClick = null,
   }) {
     super();
     this.#offersModel = offersModel;
@@ -200,9 +217,9 @@ export default class FormView extends AbstractStatefulView {
         destinations: this.#destinations,
       })
     );
-    this.#handleCloseForm = onFormClose;
     this.#handleFormSubmit = onFormSubmit;
     this.#handleFormReset = onFormReset;
+    this.#handleResetButton = onResetButtonClick ?? this.#handleFormReset;
     this._restoreHandlers();
   }
 
@@ -226,9 +243,11 @@ export default class FormView extends AbstractStatefulView {
     this.element
       .querySelector('.event__reset-btn')
       .addEventListener('click', this.#resetBtnClickHandler);
-    this.element
-      .querySelector('.event__rollup-btn')
-      .addEventListener('click', this.#closeBtnClickHandler);
+    if (this._state.id) {
+      this.element
+        .querySelector('.event__rollup-btn')
+        .addEventListener('click', this.#closeBtnClickHandler);
+    }
     this.element
       .querySelector('.event__input--destination')
       .addEventListener('change', this.#destinationChangeHandler);
@@ -240,6 +259,9 @@ export default class FormView extends AbstractStatefulView {
         .querySelector('.event__available-offers')
         .addEventListener('change', this.#offerClickHandler);
     }
+    this.element
+      .querySelector('.event__input--price')
+      .addEventListener('change', this.#priceChangeHandler);
     this.#setDatepickers();
   }
 
@@ -257,7 +279,7 @@ export default class FormView extends AbstractStatefulView {
       Array.from(state.typeOffers.keys()),
       state.offers
     );
-    state.destinationInfo = destinations.get(state.destination);
+    state.destinationInfo = state.destination ? destinations.get(state.destination) : {};
 
     return state;
   }
@@ -271,6 +293,7 @@ export default class FormView extends AbstractStatefulView {
         event.offers.push(id);
       }
     });
+    event.basePrice = Number(event.basePrice);
     delete event.typeOffers;
     delete event.offersSelection;
     delete event.destinationInfo;
@@ -295,13 +318,12 @@ export default class FormView extends AbstractStatefulView {
 
   #resetBtnClickHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormReset();
+    this.#handleResetButton();
   };
 
   #closeBtnClickHandler = (evt) => {
     evt.preventDefault();
     this.#handleFormReset();
-    this.#handleCloseForm();
   };
 
   #destinationChangeHandler = (evt) => {
@@ -333,6 +355,11 @@ export default class FormView extends AbstractStatefulView {
     });
   };
 
+  #priceChangeHandler = (evt) => {
+    evt.preventDefault();
+    this._setState({ basePrice: evt.target.value });
+  };
+
   #offerClickHandler = (evt) => {
     evt.preventDefault();
     const offerId = evt.target.dataset.offerId;
@@ -354,9 +381,12 @@ export default class FormView extends AbstractStatefulView {
       this.element.querySelector('#event-start-time-1'),
       {
         ...config,
-        defaultDate: this._state.dateFrom ?? new Date(),
+        defaultDate: this._state.dateFrom,
         maxDate: this._state.dateTo ?? null,
         onClose: ([date]) => {
+          if (!date) {
+            return;
+          }
           this._setState({ dateFrom: date });
           this.#datepickerTo.config.minDate = date;
         },
@@ -366,9 +396,12 @@ export default class FormView extends AbstractStatefulView {
       this.element.querySelector('#event-end-time-1'),
       {
         ...config,
-        defaultDate: this._state.dateTo ?? null,
+        defaultDate: this._state.dateTo,
         minDate: this._state.dateFrom ?? null,
         onClose: ([date]) => {
+          if (!date) {
+            return;
+          }
           this._setState({ dateTo: date });
           this.#datepickerFrom.config.maxDate = date;
         },

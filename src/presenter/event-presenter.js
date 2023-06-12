@@ -1,7 +1,8 @@
 import EventView from '../view/event-view.js';
 import FormView from '../view/form-view.js';
 import { render, replace, remove } from '../framework/render.js';
-import { isKeyEscape } from '../utils.js';
+import { isKeyEscape, isDatesEqual, getDuration } from '../utils.js';
+import { UserAction, UpdateType } from '../const.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -23,18 +24,22 @@ export default class EventPresenter {
   #handleEventChange = null;
   #handleModeChange = null;
 
+  #isOnlyOneShowing = null;
+
   constructor({
     container,
     offersModel,
     destinationsModel,
     onEventChange,
     onModeChange,
+    isOnlyOneShowing,
   }) {
     this.#container = container;
     this.#offersModel = offersModel;
     this.#destinationsModel = destinationsModel;
     this.#handleEventChange = onEventChange;
     this.#handleModeChange = onModeChange;
+    this.#isOnlyOneShowing = isOnlyOneShowing;
   }
 
   init(event) {
@@ -60,9 +65,9 @@ export default class EventPresenter {
       offersModel: this.#offersModel,
       destinationsModel: this.#destinationsModel,
       container: this.#container,
-      onFormClose: this.#handleFormClose,
       onFormSubmit: this.#handleFormSubmit,
       onFormReset: this.#handleFormReset,
+      onResetButtonClick: this.#handleEventDelete,
     });
 
     if (prevEventComponent === null || prevFormComponent === null) {
@@ -90,7 +95,6 @@ export default class EventPresenter {
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
       this.#handleFormReset();
-      this.#handleFormClose();
     }
   }
 
@@ -111,7 +115,6 @@ export default class EventPresenter {
     }
     evt.preventDefault();
     this.#handleFormReset();
-    this.#handleFormClose();
   };
 
   #handleFormOpen = () => {
@@ -125,16 +128,36 @@ export default class EventPresenter {
   };
 
   #handleFormSubmit = (changedEvent) => {
-    this.#handleEventChange(changedEvent);
+    const isMinorUpdate =
+      !isDatesEqual(this.#event.dateFrom, changedEvent.dateFrom) ||
+      this.#event.basePrice !== changedEvent.basePrice ||
+      getDuration(this.#event.dateFrom, this.#event.dateTo) !==
+        getDuration(changedEvent.dateFrom, changedEvent.dateTo);
+
+    this.#handleEventChange(
+      UserAction.UPDATE_EVENT,
+      isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
+      changedEvent
+    );
+    this.#handleFormClose();
+  };
+
+  #handleEventDelete = () => {
+    this.#handleEventChange(
+      UserAction.DELETE_EVENT,
+      this.#isOnlyOneShowing ? UpdateType.MINOR : UpdateType.MAJOR,
+      this.#event
+    );
     this.#handleFormClose();
   };
 
   #handleFormReset = () => {
     this.#formComponent.reset(this.#event);
+    this.#handleFormClose();
   };
 
   #handleFavoriteClick = () => {
-    this.#handleEventChange({
+    this.#handleEventChange(UserAction.UPDATE_EVENT, UpdateType.PATCH, {
       ...this.#event,
       isFavorite: !this.#event.isFavorite,
     });
