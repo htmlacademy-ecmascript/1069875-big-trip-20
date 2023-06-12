@@ -79,6 +79,15 @@ function createDataListItemTemplate(title) {
   return `<option value='${title}'></option>`;
 }
 
+function getControls({ isNewEvent }) {
+  return isNewEvent
+    ? '<button class="event__reset-btn" type="reset">Cancel</button>'
+    : `<button class="event__reset-btn" type="reset">Delete</button>
+       <button class="event__rollup-btn" type="button">
+         <span class="visually-hidden">Open event</span>
+       </button>`;
+}
+
 function createFormTemplate({ event, destinationsNames }) {
   const {
     type,
@@ -109,6 +118,8 @@ function createFormTemplate({ event, destinationsNames }) {
   const destinationInfoTemplate = destinationInfo.description
     ? createDestinationInfoTemplate(destinationInfo)
     : '';
+
+  const controls = getControls({ isNewEvent: !event.id });
 
   return `<li class="trip-events__item">
             <form class="event event--edit" action="#" method="post" autocomplete="off">
@@ -157,12 +168,8 @@ function createFormTemplate({ event, destinationsNames }) {
                     oninvalid="this.setCustomValidity('Пожалуйста, введите целое положительное число')" onchange="this.setCustomValidity('')">
                 </div>
 
-                <button class="event__save-btn  btn  btn--blue" type="submit"
-                  ${destinationsNames.has(destinationInfo.name) ? '' : 'disabled'}>Save</button>
-                <button class="event__reset-btn" type="reset">Delete</button>
-                <button class="event__rollup-btn" type="button">
-                  <span class="visually-hidden">Open event</span>
-                </button>
+                <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+                ${controls}
               </header>
               <section class="event__details">
                 ${offersTemplate}
@@ -236,9 +243,11 @@ export default class FormView extends AbstractStatefulView {
     this.element
       .querySelector('.event__reset-btn')
       .addEventListener('click', this.#resetBtnClickHandler);
-    this.element
-      .querySelector('.event__rollup-btn')
-      .addEventListener('click', this.#closeBtnClickHandler);
+    if (this._state.id) {
+      this.element
+        .querySelector('.event__rollup-btn')
+        .addEventListener('click', this.#closeBtnClickHandler);
+    }
     this.element
       .querySelector('.event__input--destination')
       .addEventListener('change', this.#destinationChangeHandler);
