@@ -93,6 +93,10 @@ function createFormTemplate({ event, destinationsNames }) {
     .map((name) => createDataListItemTemplate(name))
     .join('');
 
+  const destinationInputPattern = `(${Array.from(destinationsNames.keys()).join(
+    ')|('
+  )})`;
+
   const typesListTemplate = EVENTS_TYPES.map((title) =>
     createTypesListItemTemplate(title)
   ).join('');
@@ -106,7 +110,7 @@ function createFormTemplate({ event, destinationsNames }) {
     : '';
 
   return `<li class="trip-events__item">
-            <form class="event event--edit" action="#" method="post">
+            <form class="event event--edit" action="#" method="post" autocomplete="off">
               <header class="event__header">
                 <div class="event__type-wrapper">
                   <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -126,7 +130,9 @@ function createFormTemplate({ event, destinationsNames }) {
                     ${startStringWithCapital(type)}
                   </label>
                   <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination"
-                    value="${destinationInfo.name ? destinationInfo.name : ''}" list="destination-list-1">
+                    value="${destinationInfo.name ? destinationInfo.name : ''}" list="destination-list-1"
+                    pattern="${destinationInputPattern}"
+                    oninvalid="this.setCustomValidity('Пожалуйста, выберите пункт назначения из предложенного списка')" onchange="this.setCustomValidity('')" required>
                   <datalist id="destination-list-1">${dataListTemplate}</datalist>
                 </div>
 
@@ -145,10 +151,13 @@ function createFormTemplate({ event, destinationsNames }) {
                     <span class="visually-hidden">Price</span>
                     &euro;
                   </label>
-                  <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}">
+                  <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price"
+                    value="${basePrice}" pattern="^[1-9]&bsol;d*$" required
+                    oninvalid="this.setCustomValidity('Пожалуйста, введите целое положительное число')" onchange="this.setCustomValidity('')">
                 </div>
 
-                <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+                <button class="event__save-btn  btn  btn--blue" type="submit"
+                  ${destinationsNames.has(destinationInfo.name) ? '' : 'disabled'}>Save</button>
                 <button class="event__reset-btn" type="reset">Delete</button>
                 <button class="event__rollup-btn" type="button">
                   <span class="visually-hidden">Open event</span>
@@ -240,6 +249,9 @@ export default class FormView extends AbstractStatefulView {
         .querySelector('.event__available-offers')
         .addEventListener('change', this.#offerClickHandler);
     }
+    this.element
+      .querySelector('.event__input--price')
+      .addEventListener('change', this.#priceChangeHandler);
     this.#setDatepickers();
   }
 
@@ -330,6 +342,11 @@ export default class FormView extends AbstractStatefulView {
         Array.from(this._state.typeOffers.keys())
       ),
     });
+  };
+
+  #priceChangeHandler = (evt) => {
+    evt.preventDefault();
+    this._setState({ basePrice: evt.target.value });
   };
 
   #offerClickHandler = (evt) => {
