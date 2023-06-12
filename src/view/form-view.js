@@ -372,9 +372,12 @@ export default class FormView extends AbstractStatefulView {
       this.element.querySelector('#event-start-time-1'),
       {
         ...config,
-        defaultDate: this._state.dateFrom ?? new Date(),
+        defaultDate: this._state.dateFrom,
         maxDate: this._state.dateTo ?? null,
         onClose: ([date]) => {
+          if (!date) {
+            return;
+          }
           this._setState({ dateFrom: date });
           this.#datepickerTo.config.minDate = date;
         },
@@ -384,9 +387,12 @@ export default class FormView extends AbstractStatefulView {
       this.element.querySelector('#event-end-time-1'),
       {
         ...config,
-        defaultDate: this._state.dateTo ?? null,
+        defaultDate: this._state.dateTo,
         minDate: this._state.dateFrom ?? null,
         onClose: ([date]) => {
+          if (!date) {
+            return;
+          }
           this._setState({ dateTo: date });
           this.#datepickerFrom.config.maxDate = date;
         },
