@@ -1,4 +1,5 @@
 import Observable from '../framework/observable.js';
+import { UpdateType } from '../const.js';
 
 export default class EventsModel extends Observable {
   #apiService = null;
@@ -18,6 +19,7 @@ export default class EventsModel extends Observable {
     } catch (err) {
       this.#events = new Map();
     }
+    this._notify(UpdateType.INIT, { events: true });
   }
 
   get events() {
