@@ -67,7 +67,7 @@ export default class EventPresenter {
       container: this.#container,
       onFormSubmit: this.#handleFormSubmit,
       onFormReset: this.#handleFormReset,
-      onResetButtonClick: this.#handleEventDelete,
+      onDelete: this.#handleEventDelete,
     });
 
     if (prevEventComponent === null || prevFormComponent === null) {

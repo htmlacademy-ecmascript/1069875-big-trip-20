@@ -17,12 +17,11 @@ export default class OffersModel extends Observable {
         data.map(({ type, offers }) => [
           type,
           new Map(offers.map((offer) => [offer.id, offer])),
-        ])
-      );
+        ]));
+      this._notify(UpdateType.INIT, { offers: true });
     } catch (err) {
-      this.#offers = new Map();
+      throw new Error('Could\'t down load offers information');
     }
-    this._notify(UpdateType.INIT, { offers: true });
   }
 
   get offers() {

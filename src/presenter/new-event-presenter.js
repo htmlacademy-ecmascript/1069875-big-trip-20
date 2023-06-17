@@ -38,6 +38,7 @@ export default class NewEventPresenter {
       container: this.#container,
       onFormSubmit: this.#handleFormSubmit,
       onFormReset: () => this.destroy(),
+      isNewEvent: true,
     });
 
     render(this.#formComponent, this.#container, RenderPosition.AFTERBEGIN);

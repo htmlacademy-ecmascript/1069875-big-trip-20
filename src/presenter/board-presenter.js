@@ -218,7 +218,7 @@ export default class BoardPresenter {
         break;
       case UpdateType.INIT:
         this.#isReady = { ...this.#isReady, ...update };
-        if (!Array.from(Object.values(this.#isReady)).every((value) => value)) {
+        if (!this.#isReady.destinations || !this.#isReady.offers || !this.#isReady.events) {
           return;
         }
         this.#isLoading = false;

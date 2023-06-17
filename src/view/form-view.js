@@ -88,7 +88,11 @@ function getControls({ isNewEvent }) {
        </button>`;
 }
 
-function createFormTemplate({ event, destinationsNames }) {
+function createFormTemplate({
+  event,
+  destinationsNames,
+  isNewEvent,
+}) {
   const {
     type,
     dateFrom,
@@ -115,11 +119,11 @@ function createFormTemplate({ event, destinationsNames }) {
     ? createOffersTemplate({ typeOffers, offersSelection })
     : '';
 
-  const destinationInfoTemplate = destinationInfo.description
+  const destinationInfoTemplate = destinationInfo
     ? createDestinationInfoTemplate(destinationInfo)
     : '';
 
-  const controls = getControls({ isNewEvent: !event.id });
+  const controls = getControls({ isNewEvent });
 
   return `<li class="trip-events__item">
             <form class="event event--edit" action="#" method="post" autocomplete="off">
@@ -142,7 +146,7 @@ function createFormTemplate({ event, destinationsNames }) {
                     ${startStringWithCapital(type)}
                   </label>
                   <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination"
-                    value="${destinationInfo.name ? he.encode(destinationInfo.name) : ''}" list="destination-list-1"
+                    value="${destinationInfo ? he.encode(destinationInfo.name) : ''}" list="destination-list-1"
                     pattern="${destinationInputPattern}"
                     oninvalid="this.setCustomValidity('Пожалуйста, выберите пункт назначения из предложенного списка')" onchange="this.setCustomValidity('')" required>
                   <datalist id="destination-list-1">${dataListTemplate}</datalist>
@@ -151,11 +155,11 @@ function createFormTemplate({ event, destinationsNames }) {
                 <div class="event__field-group  event__field-group--time">
                   <label class="visually-hidden" for="event-start-time-1">From</label>
                   <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time"
-                    value="${transformDate(dateFrom, DateFormats.FOR_FORM)}">
+                    value="${dateFrom ? transformDate(dateFrom, DateFormats.FOR_FORM) : ''}" required>
                   &mdash;
                   <label class="visually-hidden" for="event-end-time-1">To</label>
                   <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time"
-                    value="${transformDate(dateTo, DateFormats.FOR_FORM)}">
+                    value="${dateTo ? transformDate(dateTo, DateFormats.FOR_FORM) : ''}" required>
                 </div>
 
                 <div class="event__field-group  event__field-group--price">
@@ -194,13 +198,18 @@ export default class FormView extends AbstractStatefulView {
   #datepickerFrom = null;
   #datepickerTo = null;
 
+  #isNewEvent = false;
+
+  #saveButtonElement = null;
+
   constructor({
     event = EMPTY_EVENT,
     offersModel,
     destinationsModel,
     onFormSubmit,
     onFormReset,
-    onResetButtonClick = null,
+    onDelete = null,
+    isNewEvent = false,
   }) {
     super();
     this.#offersModel = offersModel;
@@ -219,8 +228,13 @@ export default class FormView extends AbstractStatefulView {
     );
     this.#handleFormSubmit = onFormSubmit;
     this.#handleFormReset = onFormReset;
-    this.#handleResetButton = onResetButtonClick ?? this.#handleFormReset;
+    this.#handleResetButton = onDelete ?? this.#handleFormReset;
+    this.#isNewEvent = isNewEvent;
+    if (isNewEvent) {
+      this.#saveButtonElement.disabled = true;
+    }
     this._restoreHandlers();
+    this.#saveButtonElement = this.element.querySelector('.event__save-btn');
   }
 
   removeElement() {
@@ -243,7 +257,7 @@ export default class FormView extends AbstractStatefulView {
     this.element
       .querySelector('.event__reset-btn')
       .addEventListener('click', this.#resetBtnClickHandler);
-    if (this._state.id) {
+    if (!this.#isNewEvent) {
       this.element
         .querySelector('.event__rollup-btn')
         .addEventListener('click', this.#closeBtnClickHandler);
@@ -269,17 +283,19 @@ export default class FormView extends AbstractStatefulView {
     return createFormTemplate({
       event: this._state,
       destinationsNames: this.#destinationsNames,
+      isNewEvent: this.#isNewEvent,
     });
   }
 
   static parseEventToState({ event, offers, destinations }) {
     const state = { ...event };
     state.typeOffers = new Map(offers.get(state.type));
-    state.offersSelection = getChosenItemsMap(
-      Array.from(state.typeOffers.keys()),
-      state.offers
-    );
-    state.destinationInfo = state.destination ? destinations.get(state.destination) : {};
+    state.offersSelection = state.offers.length
+      ? getChosenItemsMap(Array.from(state.typeOffers.keys()), state.offers)
+      : new Map();
+    state.destinationInfo = state.destination
+      ? destinations.get(state.destination)
+      : null;
 
     return state;
   }
@@ -326,11 +342,17 @@ export default class FormView extends AbstractStatefulView {
     this.#handleFormReset();
   };
 
+  #isSavingAvailable() {
+    return this._state.destinationInfo && this._state.basePrice && this._state.dateFrom && this._state.dateTo;
+  }
+
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
     if (
       !this.#destinationsNames.has(evt.target.value) ||
-      evt.target.value === this._state.destinationInfo.name
+      (this._state.destinationInfo
+        ? this._state.destinationInfo.name === evt.target.value
+        : false)
     ) {
       return;
     }
@@ -339,6 +361,9 @@ export default class FormView extends AbstractStatefulView {
         this.#destinationsNames.get(evt.target.value)
       ),
     });
+    if (this.#isSavingAvailable()) {
+      this.#saveButtonElement.disabled = false;
+    }
   };
 
   #typeChangeHandler = (evt) => {
@@ -357,7 +382,12 @@ export default class FormView extends AbstractStatefulView {
 
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
-    this._setState({ basePrice: evt.target.value });
+    this._setState({
+      basePrice: evt.target.value,
+    });
+    if (this.#isSavingAvailable()) {
+      this.#saveButtonElement.disabled = false;
+    }
   };
 
   #offerClickHandler = (evt) => {
@@ -389,6 +419,9 @@ export default class FormView extends AbstractStatefulView {
           }
           this._setState({ dateFrom: date });
           this.#datepickerTo.config.minDate = date;
+          if (this.#isSavingAvailable()) {
+            this.#saveButtonElement.disabled = false;
+          }
         },
       }
     );
@@ -404,6 +437,9 @@ export default class FormView extends AbstractStatefulView {
           }
           this._setState({ dateTo: date });
           this.#datepickerFrom.config.maxDate = date;
+          if (this.#isSavingAvailable()) {
+            this.#saveButtonElement.disabled = false;
+          }
         },
       }
     );

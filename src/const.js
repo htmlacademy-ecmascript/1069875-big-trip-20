@@ -51,10 +51,10 @@ const DurationFormats = {
 
 const EMPTY_EVENT = {
   type: EVENTS_TYPES[0],
-  destination: '',
+  destination: null,
   basePrice: 0,
-  dateFrom: new Date(),
-  dateTo: new Date(),
+  dateFrom: null,
+  dateTo: null,
   offers: [],
   isFavorite: false,
 };
