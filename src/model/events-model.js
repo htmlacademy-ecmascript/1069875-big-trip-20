@@ -1,15 +1,24 @@
 import Observable from '../framework/observable.js';
-import { getRandomEvent } from '../mock/event.js';
-
-const EVENTS_NUMBER = 5;
 
 export default class EventsModel extends Observable {
-  #events = new Map(
-    Array.from({ length: EVENTS_NUMBER }, getRandomEvent).map((event) => [
-      event.id,
-      event,
-    ])
-  );
+  #apiService = null;
+  #events = [];
+
+  constructor({ apiService }) {
+    super();
+    this.#apiService = apiService;
+  }
+
+  async init() {
+    try {
+      const data = await this.#apiService.events;
+      this.#events = new Map(
+        data.map((event) => [event.id, this.#apiService.adaptToClient(event)])
+      );
+    } catch (err) {
+      this.#events = new Map();
+    }
+  }
 
   get events() {
     return Array.from(this.#events.values());
