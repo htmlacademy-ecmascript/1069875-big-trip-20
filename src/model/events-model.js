@@ -26,12 +26,19 @@ export default class EventsModel extends Observable {
     return Array.from(this.#events.values());
   }
 
-  updateEvent(updateType, update) {
+  async updateEvent(updateType, update) {
     if (!this.#events.has(update.id)) {
       throw new Error('Can\'t update nonexisting task');
     }
-    this.#events.set(update.id, update);
-    this._notify(updateType, update);
+
+    try {
+      const response = await this.#apiService.updateEvent(update);
+      const updatedEvent = this.#apiService.adaptToClient(response);
+      this.#events.set(updatedEvent.id, updatedEvent);
+      this._notify(updateType, updatedEvent);
+    } catch (err) {
+      throw new Error('Can\'t update task');
+    }
   }
 
   addEvent(updateType, update) {
