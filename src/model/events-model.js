@@ -37,20 +37,31 @@ export default class EventsModel extends Observable {
       this.#events.set(updatedEvent.id, updatedEvent);
       this._notify(updateType, updatedEvent);
     } catch (err) {
-      throw new Error('Can\'t update task');
+      throw new Error('Can\'t update event');
     }
   }
 
-  addEvent(updateType, update) {
-    this.#events.set(update.id, update);
-    this._notify(updateType, update);
+  async addEvent(updateType, update) {
+    try {
+      const response = await this.#apiService.addEvent(update);
+      const newEvent = this.#apiService.adaptToClient(response);
+      this.#events.set(newEvent.id, newEvent);
+      this._notify(updateType, newEvent);
+    } catch (err) {
+      throw new Error('Can\'t add new event');
+    }
   }
 
-  removeEvent(updateType, update) {
+  async removeEvent(updateType, update) {
     if (!this.#events.has(update.id)) {
       throw new Error('Can\'t delete nonexisting task');
     }
-    this.#events.delete(update.id);
-    this._notify(updateType, update);
+    try {
+      await this.#apiService.deleteEvent(update);
+      this.#events.delete(update.id);
+      this._notify(updateType, update);
+    } catch (err) {
+      throw new Error('Can\'t delete event');
+    }
   }
 }

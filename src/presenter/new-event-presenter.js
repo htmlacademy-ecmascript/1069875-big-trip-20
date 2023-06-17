@@ -63,10 +63,7 @@ export default class NewEventPresenter {
   };
 
   #handleFormSubmit = (newEvent) => {
-    this.#handleDataChange(UserAction.ADD_EVENT, UpdateType.MINOR, {
-      ...newEvent,
-      id: crypto.randomUUID(),
-    });
+    this.#handleDataChange(UserAction.ADD_EVENT, UpdateType.MINOR, newEvent);
     this.destroy();
   };
 }
