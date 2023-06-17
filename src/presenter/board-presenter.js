@@ -37,6 +37,8 @@ export default class BoardPresenter {
     offers: false,
   };
 
+  #handleOnReady = null;
+
   #showingEventsNumber = 0;
 
   constructor({
@@ -46,6 +48,7 @@ export default class BoardPresenter {
     destinationsModel,
     filterModel,
     onNewEventDestroy,
+    onReady,
   }) {
     this.#container = container;
     this.#eventsModel = eventsModel;
@@ -60,6 +63,7 @@ export default class BoardPresenter {
       onDataChange: this.#handleViewAction,
       onDestroy: onNewEventDestroy,
     });
+    this.#handleOnReady = onReady;
 
     this.#eventsModel.addObserver(this.#handleModelEvent);
     this.#offersModel.addObserver(this.#handleModelEvent);
@@ -213,13 +217,14 @@ export default class BoardPresenter {
         this.#renderBoard();
         break;
       case UpdateType.INIT:
-        this.#isReady = {...this.#isReady, ...update};
+        this.#isReady = { ...this.#isReady, ...update };
         if (!Array.from(Object.values(this.#isReady)).every((value) => value)) {
           return;
         }
         this.#isLoading = false;
         this.#clearBoard();
         this.#renderBoard();
+        this.#handleOnReady();
         break;
     }
   };

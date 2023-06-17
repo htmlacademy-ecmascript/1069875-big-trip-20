@@ -53,10 +53,6 @@ export default class AppPresenter {
     this.#renderTripInfo();
     this.#renderFilters();
     this.#renderBoard();
-    this.#newEventButtonComponent = new NewEventButtonView({
-      onClick: this.#handleNewEventButtonClick,
-    });
-    render(this.#newEventButtonComponent, this.#tripMainElement);
   }
 
   #renderTripInfo() {
@@ -84,9 +80,17 @@ export default class AppPresenter {
       destinationsModel: this.#destinationsModel,
       filterModel: this.#filterModel,
       onNewEventDestroy: this.#handleNewEventFormClose,
+      onReady: this.#renderNewEventButton,
     });
     this.#boardPresenter.init();
   }
+
+  #renderNewEventButton = () => {
+    this.#newEventButtonComponent = new NewEventButtonView({
+      onClick: this.#handleNewEventButtonClick,
+    });
+    render(this.#newEventButtonComponent, this.#tripMainElement);
+  };
 
   #handleNewEventFormClose = () => {
     this.#newEventButtonComponent.element.disabled = false;
