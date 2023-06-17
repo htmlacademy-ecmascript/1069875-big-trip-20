@@ -1,5 +1,4 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { NoEventsMessages } from '../const.js';
 
 function createNoEventsTemplate(message) {
   return `<p class="trip-events__msg">${message}</p>`;
@@ -8,9 +7,9 @@ function createNoEventsTemplate(message) {
 export default class NoEventsView extends AbstractView {
   #message = '';
 
-  constructor({ currentFilter }) {
+  constructor(message) {
     super();
-    this.#message = NoEventsMessages[currentFilter];
+    this.#message = message;
   }
 
   get template() {

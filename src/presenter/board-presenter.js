@@ -4,7 +4,13 @@ import SortingView from '../view/sorting-view.js';
 import EventPresenter from './event-presenter.js';
 import NewEventPresenter from './new-event-presenter.js';
 import { render, remove } from '../framework/render.js';
-import { SortingNames, FiltersNames, UpdateType, UserAction } from '../const.js';
+import {
+  SortingNames,
+  FiltersNames,
+  UpdateType,
+  UserAction,
+  NoEventsMessages,
+} from '../const.js';
 import { filtersFunctions, sortByTime, sortByPrice } from '../utils.js';
 
 export default class BoardPresenter {
@@ -23,6 +29,13 @@ export default class BoardPresenter {
   #newEventPresenter = null;
 
   #currentSorting = SortingNames.DAY;
+
+  #isLoading = true;
+  #isReady = {
+    events: false,
+    destinations: false,
+    offers: false,
+  };
 
   #showingEventsNumber = 0;
 
@@ -49,6 +62,8 @@ export default class BoardPresenter {
     });
 
     this.#eventsModel.addObserver(this.#handleModelEvent);
+    this.#offersModel.addObserver(this.#handleModelEvent);
+    this.#destinationsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
@@ -72,8 +87,17 @@ export default class BoardPresenter {
   }
 
   #renderBoard() {
+    if (this.#isLoading) {
+      this.#renderNoEvents({
+        message: NoEventsMessages.LOADING,
+      });
+      return;
+    }
+
     if (!this.events.length) {
-      this.#renderNoEvents();
+      this.#renderNoEvents({
+        message: NoEventsMessages[this.#filterModel.filter],
+      });
       return;
     }
 
@@ -97,13 +121,11 @@ export default class BoardPresenter {
     this.#currentSorting = SortingNames.DAY;
   }
 
-  #renderNoEvents() {
+  #renderNoEvents({ message }) {
     if (this.#noEventsComponent) {
       remove(this.#noEventsComponent);
     }
-    this.#noEventsComponent = new NoEventsView({
-      currentFilter: this.#filterModel.filter,
-    });
+    this.#noEventsComponent = new NoEventsView(message);
     render(this.#noEventsComponent, this.#container);
   }
 
@@ -187,6 +209,15 @@ export default class BoardPresenter {
         this.#renderEvents();
         break;
       case UpdateType.MAJOR:
+        this.#clearBoard();
+        this.#renderBoard();
+        break;
+      case UpdateType.INIT:
+        this.#isReady = {...this.#isReady, ...update};
+        if (!Array.from(Object.values(this.#isReady)).every((value) => value)) {
+          return;
+        }
+        this.#isLoading = false;
         this.#clearBoard();
         this.#renderBoard();
         break;
