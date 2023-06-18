@@ -72,6 +72,11 @@ const UpdateType = {
   INIT: 'INIT',
 };
 
+const UiBlockerTimeLimits = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000,
+};
+
 export {
   EVENTS_TYPES,
   FiltersNames,
@@ -83,4 +88,5 @@ export {
   EMPTY_EVENT,
   UserAction,
   UpdateType,
+  UiBlockerTimeLimits,
 };
