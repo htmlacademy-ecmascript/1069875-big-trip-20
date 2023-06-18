@@ -19,7 +19,7 @@ export default class NewEventPresenter {
     offersModel,
     destinationsModel,
     onDataChange,
-    onDestroy
+    onDestroy,
   }) {
     this.#container = container;
     this.#offersModel = offersModel;
@@ -55,6 +55,25 @@ export default class NewEventPresenter {
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
+  setSaving() {
+    this.#formComponent.updateElement({
+      isSaving: true,
+      isDisabled: true,
+    });
+  }
+
+  setAbortion() {
+    const resetFormState = () => {
+      this.#formComponent.updateElement({
+        isSaving: false,
+        isDeleting: false,
+        isDisabled: false,
+      });
+    };
+
+    this.#formComponent.shake(resetFormState);
+  }
+
   #escKeyDownHandler = (evt) => {
     if (!isKeyEscape(evt)) {
       return;
@@ -65,6 +84,5 @@ export default class NewEventPresenter {
 
   #handleFormSubmit = (newEvent) => {
     this.#handleDataChange(UserAction.ADD_EVENT, UpdateType.MINOR, newEvent);
-    this.destroy();
   };
 }

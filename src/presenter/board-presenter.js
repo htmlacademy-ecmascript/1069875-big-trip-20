@@ -189,16 +189,31 @@ export default class BoardPresenter {
     this.#eventsPresenters.forEach((presenter) => presenter.resetView());
   };
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = async (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.UPDATE_EVENT:
-        this.#eventsModel.updateEvent(updateType, update);
+        this.#eventsPresenters.get(update.id).setSaving();
+        try {
+          await this.#eventsModel.updateEvent(updateType, update);
+        } catch (err) {
+          this.#eventsPresenters.get(update.id).setAbortion();
+        }
         break;
       case UserAction.ADD_EVENT:
-        this.#eventsModel.addEvent(updateType, update);
+        this.#newEventPresenter.setSaving();
+        try {
+          await this.#eventsModel.addEvent(updateType, update);
+        } catch (err) {
+          this.#newEventPresenter.get(update.id).setAbortion();
+        }
         break;
       case UserAction.DELETE_EVENT:
-        this.#eventsModel.removeEvent(updateType, update);
+        this.#eventsPresenters.get(update.id).setDeleting();
+        try {
+          await this.#eventsModel.removeEvent(updateType, update);
+        } catch (err) {
+          this.#eventsPresenters.get(update.id).setAbortion();
+        }
         break;
     }
   };
