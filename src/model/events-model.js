@@ -1,26 +1,44 @@
 import Observable from '../framework/observable.js';
-import { getRandomEvent } from '../mock/event.js';
-
-const EVENTS_NUMBER = 5;
+import { UpdateType } from '../const.js';
 
 export default class EventsModel extends Observable {
-  #events = new Map(
-    Array.from({ length: EVENTS_NUMBER }, getRandomEvent).map((event) => [
-      event.id,
-      event,
-    ])
-  );
+  #apiService = null;
+  #events = [];
+
+  constructor({ apiService }) {
+    super();
+    this.#apiService = apiService;
+  }
+
+  async init() {
+    try {
+      const data = await this.#apiService.events;
+      this.#events = new Map(
+        data.map((event) => [event.id, this.#apiService.adaptToClient(event)])
+      );
+    } catch (err) {
+      this.#events = new Map();
+    }
+    this._notify(UpdateType.INIT, { events: true });
+  }
 
   get events() {
     return Array.from(this.#events.values());
   }
 
-  updateEvent(updateType, update) {
+  async updateEvent(updateType, update) {
     if (!this.#events.has(update.id)) {
       throw new Error('Can\'t update nonexisting task');
     }
-    this.#events.set(update.id, update);
-    this._notify(updateType, update);
+
+    try {
+      const response = await this.#apiService.updateEvent(update);
+      const updatedEvent = this.#apiService.adaptToClient(response);
+      this.#events.set(updatedEvent.id, updatedEvent);
+      this._notify(updateType, updatedEvent);
+    } catch (err) {
+      throw new Error('Can\'t update task');
+    }
   }
 
   addEvent(updateType, update) {

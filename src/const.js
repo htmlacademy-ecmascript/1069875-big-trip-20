@@ -26,6 +26,7 @@ const SortingNames = {
 const EVENT_ITEMS = ['day', 'event', 'time', 'price', 'offers'];
 
 const NoEventsMessages = {
+  LOADING: 'Loading...',
   [FiltersNames.ALL]: 'Click New Event to create your first point',
   [FiltersNames.FUTURE]: 'There are no future events now',
   [FiltersNames.PRESENT]: 'There are no present events now',
@@ -68,6 +69,7 @@ const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
+  INIT: 'INIT',
 };
 
 export {

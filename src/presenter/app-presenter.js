@@ -1,3 +1,6 @@
+import EventsApiService from '../service/events-api-service.js';
+import OffersApiService from '../service/offers-api-service.js';
+import DestinationsApiService from '../service/destinations-api-service.js';
 import EventsModel from '../model/events-model.js';
 import OffersModel from '../model/offers-model.js';
 import DestinationsModel from '../model/destinations-model.js';
@@ -17,23 +20,39 @@ export default class AppPresenter {
   #boardPresenter = null;
   #newEventButtonComponent = null;
 
-  #eventsModel = new EventsModel();
-  #offersModel = new OffersModel();
-  #destinationsModel = new DestinationsModel();
+  #eventsModel = null;
+  #offersModel = null;
+  #destinationsModel = null;
   #filterModel = new FilterModel();
 
-  constructor({ tripMainElement, filtersElement, siteMainElement }) {
+  constructor({
+    tripMainElement,
+    filtersElement,
+    siteMainElement,
+    authorization,
+    endPoint,
+  }) {
     this.#tripMainElement = tripMainElement;
     this.#filtersElement = filtersElement;
     this.#siteMainElement = siteMainElement;
+    this.#eventsModel = new EventsModel({
+      apiService: new EventsApiService(endPoint, authorization),
+    });
+    this.#offersModel = new OffersModel({
+      apiService: new OffersApiService(endPoint, authorization),
+    });
+    this.#destinationsModel = new DestinationsModel({
+      apiService: new DestinationsApiService(endPoint, authorization),
+    });
   }
 
   init() {
+    this.#eventsModel.init();
+    this.#offersModel.init();
+    this.#destinationsModel.init();
     this.#renderTripInfo();
     this.#renderFilters();
     this.#renderBoard();
-    this.#newEventButtonComponent = new NewEventButtonView({ onClick: this.#handleNewEventButtonClick });
-    render(this.#newEventButtonComponent, this.#tripMainElement);
   }
 
   #renderTripInfo() {
@@ -61,9 +80,17 @@ export default class AppPresenter {
       destinationsModel: this.#destinationsModel,
       filterModel: this.#filterModel,
       onNewEventDestroy: this.#handleNewEventFormClose,
+      onReady: this.#renderNewEventButton,
     });
     this.#boardPresenter.init();
   }
+
+  #renderNewEventButton = () => {
+    this.#newEventButtonComponent = new NewEventButtonView({
+      onClick: this.#handleNewEventButtonClick,
+    });
+    render(this.#newEventButtonComponent, this.#tripMainElement);
+  };
 
   #handleNewEventFormClose = () => {
     this.#newEventButtonComponent.element.disabled = false;
