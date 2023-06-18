@@ -183,7 +183,6 @@ export default class EventPresenter {
       this.#isOnlyOneShowing ? UpdateType.MINOR : UpdateType.MAJOR,
       this.#event
     );
-    this.#handleFormClose();
   };
 
   #handleFormReset = () => {

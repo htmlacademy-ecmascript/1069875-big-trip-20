@@ -103,6 +103,7 @@ function createFormTemplate({ event, destinationsNames, isNewEvent }) {
     typeOffers,
     offersSelection,
     destinationInfo,
+    destinationName,
     isSaving,
     isDeleting,
     isDisabled,
@@ -152,7 +153,7 @@ function createFormTemplate({ event, destinationsNames, isNewEvent }) {
                     ${startStringWithCapital(type)}
                   </label>
                   <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination"
-                    value="${destinationInfo ? he.encode(destinationInfo.name) : ''}"
+                    value="${destinationName ? he.encode(destinationName) : ''}"
                     list="destination-list-1"
                     pattern="${destinationInputPattern}"
                     oninvalid="this.setCustomValidity('Пожалуйста, выберите пункт назначения из предложенного списка')" onchange="this.setCustomValidity('')"
@@ -245,11 +246,7 @@ export default class FormView extends AbstractStatefulView {
     this.#handleFormReset = onFormReset;
     this.#handleResetButton = onDelete ?? this.#handleFormReset;
     this.#isNewEvent = isNewEvent;
-    if (isNewEvent) {
-      this.#saveButtonElement.disabled = true;
-    }
     this._restoreHandlers();
-    this.#saveButtonElement = this.element.querySelector('.event__save-btn');
   }
 
   removeElement() {
@@ -266,6 +263,8 @@ export default class FormView extends AbstractStatefulView {
   }
 
   _restoreHandlers() {
+    this.#saveButtonElement = this.element.querySelector('.event__save-btn');
+    this.#saveButtonElement.disabled = !this.#isSavingAvailable();
     this.element
       .querySelector('form')
       .addEventListener('submit', this.#formSubmitHandler);
@@ -311,6 +310,7 @@ export default class FormView extends AbstractStatefulView {
     state.destinationInfo = state.destination
       ? destinations.get(state.destination)
       : null;
+    state.destinationName = state.destinationInfo ? state.destinationInfo.name : null;
 
     state.isSaving = false;
     state.isDeleting = false;
@@ -333,6 +333,7 @@ export default class FormView extends AbstractStatefulView {
     delete event.typeOffers;
     delete event.offersSelection;
     delete event.destinationInfo;
+    delete event.destinationName;
     delete event.isSaving;
     delete event.isDeleting;
     delete event.isDisabled;
@@ -366,32 +367,20 @@ export default class FormView extends AbstractStatefulView {
   };
 
   #isSavingAvailable() {
-    return (
-      this._state.destinationInfo &&
-      this._state.basePrice &&
-      this._state.dateFrom &&
-      this._state.dateTo
-    );
+    return this._state.destinationInfo &&
+        Number(this._state.basePrice) &&
+        this._state.dateFrom &&
+        this._state.dateTo;
   }
 
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
-    if (
-      !this.#destinationsNames.has(evt.target.value) ||
-      (this._state.destinationInfo
-        ? this._state.destinationInfo.name === evt.target.value
-        : false)
-    ) {
-      return;
-    }
     this.updateElement({
-      destinationInfo: this.#destinations.get(
-        this.#destinationsNames.get(evt.target.value)
-      ),
+      destinationName: evt.target.value,
+      destinationInfo: this.#destinationsNames.has(evt.target.value)
+        ? this.#destinations.get(this.#destinationsNames.get(evt.target.value))
+        : null,
     });
-    if (this.#isSavingAvailable()) {
-      this.#saveButtonElement.disabled = false;
-    }
   };
 
   #typeChangeHandler = (evt) => {
@@ -413,9 +402,7 @@ export default class FormView extends AbstractStatefulView {
     this._setState({
       basePrice: evt.target.value,
     });
-    if (this.#isSavingAvailable()) {
-      this.#saveButtonElement.disabled = false;
-    }
+    this.#saveButtonElement.disabled = !this.#isSavingAvailable();
   };
 
   #offerClickHandler = (evt) => {
@@ -442,14 +429,9 @@ export default class FormView extends AbstractStatefulView {
         defaultDate: this._state.dateFrom,
         maxDate: this._state.dateTo ?? null,
         onClose: ([date]) => {
-          if (!date) {
-            return;
-          }
-          this._setState({ dateFrom: date });
-          this.#datepickerTo.config.minDate = date;
-          if (this.#isSavingAvailable()) {
-            this.#saveButtonElement.disabled = false;
-          }
+          this._setState({ dateFrom: date ?? null });
+          this.#datepickerTo.config.minDate = date ?? null;
+          this.#saveButtonElement.disabled = !this.#isSavingAvailable();
         },
       }
     );
@@ -460,14 +442,9 @@ export default class FormView extends AbstractStatefulView {
         defaultDate: this._state.dateTo,
         minDate: this._state.dateFrom ?? null,
         onClose: ([date]) => {
-          if (!date) {
-            return;
-          }
-          this._setState({ dateTo: date });
-          this.#datepickerFrom.config.maxDate = date;
-          if (this.#isSavingAvailable()) {
-            this.#saveButtonElement.disabled = false;
-          }
+          this._setState({ dateTo: date ?? null });
+          this.#datepickerFrom.config.maxDate = date ?? null;
+          this.#saveButtonElement.disabled = !this.#isSavingAvailable();
         },
       }
     );
