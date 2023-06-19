@@ -20,6 +20,10 @@ function calculateDuration(timeFrom, timeTo) {
   return dayjs.duration(dayjs(timeTo).diff(timeFrom));
 }
 
+function isDatesDaysApart(timeFrom, timeTo) {
+  return Boolean(calculateDuration(timeFrom, timeTo).days);
+}
+
 function getDuration(timeFrom, timeTo) {
   const timeDuration = calculateDuration(timeFrom, timeTo);
 
@@ -89,6 +93,7 @@ function getChosenItemsMap(items, chosenItems = []) {
 export {
   transformDate,
   isDatesEqual,
+  isDatesDaysApart,
   getDuration,
   startStringWithCapital,
   isKeyEscape,

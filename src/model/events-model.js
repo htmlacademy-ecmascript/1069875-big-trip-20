@@ -3,7 +3,7 @@ import { UpdateType } from '../const.js';
 
 export default class EventsModel extends Observable {
   #apiService = null;
-  #events = [];
+  #events = new Map();
 
   constructor({ apiService }) {
     super();
