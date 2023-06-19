@@ -68,10 +68,6 @@ export default class BoardPresenter {
     this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
-  init() {
-    this.#renderBoard();
-  }
-
   get events() {
     const filter = this.#filterModel.filter;
     const filteredEvents = filtersFunctions[filter](this.#eventsModel.events);
@@ -85,6 +81,10 @@ export default class BoardPresenter {
     }
 
     return filteredEvents;
+  }
+
+  init() {
+    this.#renderBoard();
   }
 
   #renderBoard() {

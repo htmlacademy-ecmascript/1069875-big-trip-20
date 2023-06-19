@@ -9,6 +9,10 @@ export default class DestinationsModel extends Observable {
     this.#apiService = apiService;
   }
 
+  get destinations() {
+    return this.#destinations;
+  }
+
   async init() {
     try {
       const data = await this.#apiService.destinations;
@@ -18,9 +22,5 @@ export default class DestinationsModel extends Observable {
     } catch (err) {
       throw new Error('Could\'t down load destinations information');
     }
-  }
-
-  get destinations() {
-    return this.#destinations;
   }
 }

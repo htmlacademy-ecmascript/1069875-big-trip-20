@@ -13,12 +13,6 @@ export default class TripInfoPresenter {
 
   #tripInfoComponent = null;
 
-  #isAppReady = {
-    events: false,
-    destinations: false,
-    offers: false,
-  };
-
   constructor({ container, eventsModel, destinationsModel, offersModel }) {
     this.#container = container;
     this.#eventsModel = eventsModel;
@@ -26,6 +20,25 @@ export default class TripInfoPresenter {
     this.#destinationsModel = destinationsModel;
 
     this.#eventsModel.addObserver(this.#handleModelEvent);
+  }
+
+  get events() {
+    return this.#eventsModel.events;
+  }
+
+  get destinations() {
+    return this.events.length
+      ? this.events.map((event) => event.destination)
+      : null;
+  }
+
+  get dates() {
+    return this.events.length ? this.events
+      .map((event) => ({
+        dateFrom: event.dateFrom,
+        dateTo: event.dateTo,
+      }))
+      : null;
   }
 
   init() {
@@ -46,24 +59,6 @@ export default class TripInfoPresenter {
     }
 
     replace(this.#tripInfoComponent, prevTripInfoComponent);
-  }
-
-  get events() {
-    return this.#eventsModel.events;
-  }
-
-  get destinations() {
-    return this.events.length
-      ? this.events.map((event) => event.destination)
-      : null;
-  }
-
-  get dates() {
-    return this.events.length ? this.events
-      .map((event) => ({
-        dateFrom: event.dateFrom,
-        dateTo: event.dateTo,
-      })) : null;
   }
 
   #getDestinationName(id) {

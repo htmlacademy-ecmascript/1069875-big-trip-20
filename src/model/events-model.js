@@ -11,6 +11,10 @@ export default class EventsModel extends Observable {
     this.#apiService = apiService;
   }
 
+  get events() {
+    return Array.from(this.#events.values()).sort(sortByDate);
+  }
+
   async init() {
     try {
       const data = await this.#apiService.events;
@@ -21,10 +25,6 @@ export default class EventsModel extends Observable {
       this.#events = new Map();
     }
     this._notify(UpdateType.INIT);
-  }
-
-  get events() {
-    return Array.from(this.#events.values()).sort(sortByDate);
   }
 
   async updateEvent(updateType, update) {
