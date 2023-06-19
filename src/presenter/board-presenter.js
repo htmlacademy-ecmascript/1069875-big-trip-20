@@ -35,6 +35,7 @@ export default class BoardPresenter {
   #isLoading = true;
 
   #handleOnReady = null;
+  #onNewEventDestroyHandler = null;
 
   #showingEventsNumber = 0;
 
@@ -58,13 +59,7 @@ export default class BoardPresenter {
     this.#destinationsModel = destinationsModel;
     this.#filterModel = filterModel;
 
-    this.#newEventPresenter = new NewEventPresenter({
-      container: this.#eventsListComponent.element,
-      offersModel: this.#offersModel,
-      destinationsModel: this.#destinationsModel,
-      onDataChange: this.#handleViewAction,
-      onDestroy: onNewEventDestroy,
-    });
+    this.#onNewEventDestroyHandler = onNewEventDestroy;
     this.#handleOnReady = onReady;
 
     this.#eventsModel.addObserver(this.#handleModelEvent);
@@ -149,7 +144,9 @@ export default class BoardPresenter {
   }
 
   #clearEventsList() {
-    this.#newEventPresenter.destroy();
+    if (this.#newEventPresenter) {
+      this.#newEventPresenter.destroy();
+    }
     this.#eventsPresenters.forEach((presenter) => presenter.destroy());
     this.#eventsPresenters.clear();
   }
@@ -174,8 +171,31 @@ export default class BoardPresenter {
   createEvent() {
     this.#currentSorting = SortingNames.DAY;
     this.#filterModel.setFilter(UpdateType.MAJOR, FiltersNames.ALL);
+    if (this.#noEventsComponent) {
+      remove(this.#noEventsComponent);
+      this.#noEventsComponent = null;
+      this.#renderEventsList();
+    }
+    this.#newEventPresenter = new NewEventPresenter({
+      container: this.#eventsListComponent.element,
+      offersModel: this.#offersModel,
+      destinationsModel: this.#destinationsModel,
+      onDataChange: this.#handleViewAction,
+      onDestroy: this.#handleNewEventDestroy,
+    });
     this.#newEventPresenter.init();
   }
+
+  #handleNewEventDestroy = () => {
+    if (!this.events.length) {
+      remove(this.#eventsListComponent);
+      this.#renderNoEvents({
+        message: NoEventsMessages[this.#filterModel.filter],
+      });
+    }
+    this.#onNewEventDestroyHandler();
+    this.#newEventPresenter = null;
+  };
 
   #handleSortingClick = (sortType) => {
     if (sortType === this.#currentSorting) {
@@ -187,7 +207,9 @@ export default class BoardPresenter {
   };
 
   #handleModeChange = () => {
-    this.#newEventPresenter.destroy();
+    if (this.#newEventPresenter) {
+      this.#newEventPresenter.destroy();
+    }
     this.#eventsPresenters.forEach((presenter) => presenter.resetView());
   };
 
