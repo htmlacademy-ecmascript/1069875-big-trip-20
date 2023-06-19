@@ -20,10 +20,6 @@ function calculateDuration(timeFrom, timeTo) {
   return dayjs.duration(dayjs(timeTo).diff(timeFrom));
 }
 
-function isDatesDaysApart(timeFrom, timeTo) {
-  return Boolean(calculateDuration(timeFrom, timeTo).days);
-}
-
 function getDuration(timeFrom, timeTo) {
   const timeDuration = calculateDuration(timeFrom, timeTo);
 
@@ -78,6 +74,14 @@ function sortByPrice(itemA, itemB) {
   return itemB.basePrice - itemA.basePrice;
 }
 
+function sortByDate(itemA, itemB) {
+  const byDateFrom = dayjs(itemA.dateFrom).diff(itemB.dateFrom, 'day');
+  if (byDateFrom !== 0) {
+    return byDateFrom;
+  }
+  return dayjs(itemA.dateTo).diff(itemB.dateTo);
+}
+
 function getChosenItemsMap(items, chosenItems = []) {
   if (!items.length) {
     return new Map();
@@ -93,12 +97,12 @@ function getChosenItemsMap(items, chosenItems = []) {
 export {
   transformDate,
   isDatesEqual,
-  isDatesDaysApart,
   getDuration,
   startStringWithCapital,
   isKeyEscape,
   filtersFunctions,
   sortByTime,
   sortByPrice,
+  sortByDate,
   getChosenItemsMap,
 };

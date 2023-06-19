@@ -1,5 +1,6 @@
 import Observable from '../framework/observable.js';
 import { UpdateType } from '../const.js';
+import { sortByDate } from '../utils.js';
 
 export default class EventsModel extends Observable {
   #apiService = null;
@@ -23,7 +24,7 @@ export default class EventsModel extends Observable {
   }
 
   get events() {
-    return Array.from(this.#events.values());
+    return Array.from(this.#events.values()).sort(sortByDate);
   }
 
   async updateEvent(updateType, update) {

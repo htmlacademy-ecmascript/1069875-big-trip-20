@@ -1,6 +1,6 @@
 import TripInfoView from '../view/trip-info-view.js';
 import { render, replace, RenderPosition } from '../framework/render.js';
-import { isDatesDaysApart } from '../utils.js';
+import { isDatesEqual } from '../utils.js';
 
 const MAX_DESTINATIONS_IN_TITLE = 3;
 
@@ -89,10 +89,12 @@ export default class TripInfoPresenter {
     }
 
     result.end = this.#getDestinationName(destinations.at(-1));
-    result.middle =
-      destinations.length === MAX_DESTINATIONS_IN_TITLE
-        ? this.#getDestinationName(destinations[1])
-        : '...';
+    if (destinations.length >= MAX_DESTINATIONS_IN_TITLE) {
+      result.middle =
+        destinations.length === MAX_DESTINATIONS_IN_TITLE
+          ? this.#getDestinationName(destinations[1])
+          : '...';
+    }
 
     return result;
   }
@@ -134,16 +136,16 @@ export default class TripInfoPresenter {
 
     const result = { start: dates[0].dateFrom };
     if (dates.length === 1) {
-      if (isDatesDaysApart(dates[0].dateFrom, dates[0].dateTo)) {
+      if (!isDatesEqual(dates[0].dateFrom, dates[0].dateTo)) {
         result.end = dates[0].dateTo;
       }
       return;
     }
 
-    if (!isDatesDaysApart(dates[0].dateFrom, dates.at(-1).dateTo)) {
+    if (isDatesEqual(dates[0].dateFrom, dates.at(-1).dateTo)) {
       return result;
     }
-    result.end = dates[0].dateTo;
+    result.end = dates.at(-1).dateTo;
     return result;
   }
 
