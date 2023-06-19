@@ -10,6 +10,7 @@ import TripInfoPresenter from './trip-info-presenter.js';
 import FiltersPresenter from './filters-presenter.js';
 import BoardPresenter from './board-presenter.js';
 import { render } from '../framework/render.js';
+import { showError } from '../utils.js';
 
 export default class AppPresenter {
   #tripMainElement = null;
@@ -68,7 +69,7 @@ export default class AppPresenter {
       ]);
       this.#eventsModel.init();
     } catch {
-      throw new Error('Could\'t down load information');
+      showError();
     }
   }
 

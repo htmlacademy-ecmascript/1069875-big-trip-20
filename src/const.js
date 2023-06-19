@@ -77,6 +77,8 @@ const UiBlockerTimeLimits = {
   UPPER_LIMIT: 1000,
 };
 
+const ERROR_TIME_SHOWING = 8000;
+
 export {
   EVENTS_TYPES,
   FiltersNames,
@@ -89,4 +91,5 @@ export {
   UserAction,
   UpdateType,
   UiBlockerTimeLimits,
+  ERROR_TIME_SHOWING,
 };
