@@ -19,7 +19,7 @@ export default class EventsModel extends Observable {
     } catch (err) {
       this.#events = new Map();
     }
-    this._notify(UpdateType.INIT, { events: true });
+    this._notify(UpdateType.INIT);
   }
 
   get events() {

@@ -54,21 +54,23 @@ export default class AppPresenter {
   }
 
   init() {
-    this.#eventsModel.init();
-    this.#offersModel.init();
-    this.#destinationsModel.init();
     this.#tripInfoPresenter.init();
     this.#renderFilters();
     this.#renderBoard();
+    this.#initModels();
   }
 
-  // #renderTripInfo() {
-  //   render(
-  //     new TripInfoView(),
-  //     this.#tripMainElement,
-  //     RenderPosition.AFTERBEGIN
-  //   );
-  // }
+  async #initModels() {
+    try {
+      await Promise.all([
+        this.#offersModel.init(),
+        this.#destinationsModel.init(),
+      ]);
+      this.#eventsModel.init();
+    } catch {
+      throw new Error('Could\'t down load information');
+    }
+  }
 
   #renderFilters() {
     this.#filtersPresenter = new FiltersPresenter({

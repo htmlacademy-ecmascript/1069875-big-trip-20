@@ -1,7 +1,6 @@
 import TripInfoView from '../view/trip-info-view.js';
 import { render, replace, RenderPosition } from '../framework/render.js';
 import { isDatesDaysApart } from '../utils.js';
-import { UpdateType } from '../const.js';
 
 const MAX_DESTINATIONS_IN_TITLE = 3;
 
@@ -27,8 +26,6 @@ export default class TripInfoPresenter {
     this.#destinationsModel = destinationsModel;
 
     this.#eventsModel.addObserver(this.#handleModelEvent);
-    this.#offersModel.addObserver(this.#handleModelEvent);
-    this.#destinationsModel.addObserver(this.#handleModelEvent);
   }
 
   init() {
@@ -150,17 +147,7 @@ export default class TripInfoPresenter {
     return result;
   }
 
-  #handleModelEvent = (updateType, update) => {
-    if (updateType === UpdateType.INIT) {
-      this.#isAppReady = { ...this.#isAppReady, ...update };
-      if (
-        !this.#isAppReady.destinations ||
-        !this.#isAppReady.offers ||
-        !this.#isAppReady.events
-      ) {
-        return;
-      }
-    }
+  #handleModelEvent = () => {
     this.init();
   };
 }

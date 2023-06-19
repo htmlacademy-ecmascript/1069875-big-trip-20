@@ -33,11 +33,6 @@ export default class BoardPresenter {
   #currentSorting = SortingNames.DAY;
 
   #isLoading = true;
-  #isReady = {
-    events: false,
-    destinations: false,
-    offers: false,
-  };
 
   #handleOnReady = null;
 
@@ -241,14 +236,6 @@ export default class BoardPresenter {
         this.#renderBoard();
         break;
       case UpdateType.INIT:
-        this.#isReady = { ...this.#isReady, ...update };
-        if (
-          !this.#isReady.destinations ||
-          !this.#isReady.offers ||
-          !this.#isReady.events
-        ) {
-          return;
-        }
         this.#isLoading = false;
         this.#clearBoard();
         this.#renderBoard();
