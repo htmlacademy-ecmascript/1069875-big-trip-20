@@ -16,10 +16,10 @@ export default class DestinationsModel extends Observable {
       this.#destinations = new Map(
         data.map((destination) => [destination.id, destination])
       );
+      this._notify(UpdateType.INIT, { destinations: true });
     } catch (err) {
-      this.#destinations = new Map();
+      throw new Error('Could\'t down load destinations information');
     }
-    this._notify(UpdateType.INIT, { destinations: true });
   }
 
   get destinations() {

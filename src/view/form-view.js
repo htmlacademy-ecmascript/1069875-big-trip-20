@@ -46,12 +46,13 @@ function createDestinationInfoTemplate(destination) {
           </section>`;
 }
 
-function createOffersItemTemplate({ offer, isSelected }) {
+function createOffersItemTemplate({ offer, isSelected, isDisabled }) {
   const { title, price, id } = offer;
   const selectedAttribute = isSelected ? 'checked' : '';
   return `<div class="event__offer-selector">
             <input class="event__offer-checkbox  visually-hidden" id="event-offer-${id}-1" type="checkbox"
-              name="event-offer-${id}" ${selectedAttribute} data-offer-id="${id}">
+              name="event-offer-${id}" ${selectedAttribute} data-offer-id="${id}"
+              ${isDisabled ? 'disabled' : ''}>
             <label class="event__offer-label" for="event-offer-${id}-1">
               <span class="event__offer-title">${title}</span>
               &plus;&euro;&nbsp;
@@ -60,12 +61,13 @@ function createOffersItemTemplate({ offer, isSelected }) {
           </div>`;
 }
 
-function createOffersTemplate({ typeOffers, offersSelection }) {
+function createOffersTemplate({ typeOffers, offersSelection, isDisabled }) {
   let offersItemsTemplate = '';
   typeOffers.forEach((offer) => {
     offersItemsTemplate += createOffersItemTemplate({
       offer,
       isSelected: offersSelection.get(offer.id),
+      isDisabled,
     });
   });
 
@@ -79,16 +81,20 @@ function createDataListItemTemplate(title) {
   return `<option value='${title}'></option>`;
 }
 
-function getControls({ isNewEvent }) {
+function getControls({ isNewEvent, isDisabled, isDeleting }) {
   return isNewEvent
-    ? '<button class="event__reset-btn" type="reset">Cancel</button>'
-    : `<button class="event__reset-btn" type="reset">Delete</button>
-       <button class="event__rollup-btn" type="button">
+    ? `<button class="event__reset-btn" type="reset"
+         ${isDisabled ? 'disabled' : ''}>Cancel</button>`
+    : `<button class="event__reset-btn" type="reset"
+         ${isDisabled ? 'disabled' : ''}>
+         ${isDeleting ? 'Deleting...' : 'Delete'}</button>
+       <button class="event__rollup-btn" type="button"
+         ${isDisabled ? 'disabled' : ''}>
          <span class="visually-hidden">Open event</span>
        </button>`;
 }
 
-function createFormTemplate({ event, destinationsNames }) {
+function createFormTemplate({ event, destinationsNames, isNewEvent }) {
   const {
     type,
     dateFrom,
@@ -97,6 +103,10 @@ function createFormTemplate({ event, destinationsNames }) {
     typeOffers,
     offersSelection,
     destinationInfo,
+    destinationName,
+    isSaving,
+    isDeleting,
+    isDisabled,
   } = event;
 
   const dataListTemplate = Array.from(destinationsNames.keys())
@@ -112,14 +122,14 @@ function createFormTemplate({ event, destinationsNames }) {
   ).join('');
 
   const offersTemplate = typeOffers.size
-    ? createOffersTemplate({ typeOffers, offersSelection })
+    ? createOffersTemplate({ typeOffers, offersSelection, isDisabled })
     : '';
 
-  const destinationInfoTemplate = destinationInfo.description
+  const destinationInfoTemplate = destinationInfo
     ? createDestinationInfoTemplate(destinationInfo)
     : '';
 
-  const controls = getControls({ isNewEvent: !event.id });
+  const controls = getControls({ isNewEvent, isDisabled, isDeleting });
 
   return `<li class="trip-events__item">
             <form class="event event--edit" action="#" method="post" autocomplete="off">
@@ -129,7 +139,8 @@ function createFormTemplate({ event, destinationsNames }) {
                     <span class="visually-hidden">Choose event type</span>
                     <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
                   </label>
-                  <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+                  <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox"
+                    ${isDisabled ? 'disabled' : ''}>
                   <div class="event__type-list">
                     <fieldset class="event__type-group">
                       <legend class="visually-hidden">Event type</legend>
@@ -142,20 +153,24 @@ function createFormTemplate({ event, destinationsNames }) {
                     ${startStringWithCapital(type)}
                   </label>
                   <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination"
-                    value="${destinationInfo.name ? he.encode(destinationInfo.name) : ''}" list="destination-list-1"
+                    value="${destinationName ? he.encode(destinationName) : ''}"
+                    list="destination-list-1"
                     pattern="${destinationInputPattern}"
-                    oninvalid="this.setCustomValidity('Пожалуйста, выберите пункт назначения из предложенного списка')" onchange="this.setCustomValidity('')" required>
+                    oninvalid="this.setCustomValidity('Пожалуйста, выберите пункт назначения из предложенного списка')" onchange="this.setCustomValidity('')"
+                    required ${isDisabled ? 'disabled' : ''}>
                   <datalist id="destination-list-1">${dataListTemplate}</datalist>
                 </div>
 
                 <div class="event__field-group  event__field-group--time">
                   <label class="visually-hidden" for="event-start-time-1">From</label>
                   <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time"
-                    value="${transformDate(dateFrom, DateFormats.FOR_FORM)}">
+                    value="${dateFrom ? transformDate(dateFrom, DateFormats.FOR_FORM) : ''}"
+                    required ${isDisabled ? 'disabled' : ''}>
                   &mdash;
                   <label class="visually-hidden" for="event-end-time-1">To</label>
                   <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time"
-                    value="${transformDate(dateTo, DateFormats.FOR_FORM)}">
+                    value="${dateTo ? transformDate(dateTo, DateFormats.FOR_FORM) : ''}"
+                    required ${isDisabled ? 'disabled' : ''}>
                 </div>
 
                 <div class="event__field-group  event__field-group--price">
@@ -164,12 +179,17 @@ function createFormTemplate({ event, destinationsNames }) {
                     &euro;
                   </label>
                   <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price"
-                    value="${he.encode(String(basePrice))}" pattern="^[1-9]&bsol;d*$" required
-                    oninvalid="this.setCustomValidity('Пожалуйста, введите целое положительное число')" onchange="this.setCustomValidity('')">
+                    value="${he.encode(String(basePrice))}"
+                    pattern="^[1-9]&bsol;d*$" required
+                    oninvalid="this.setCustomValidity('Пожалуйста, введите целое положительное число')" onchange="this.setCustomValidity('')"
+                    ${isDisabled ? 'disabled' : ''}>
                 </div>
 
-                <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-                ${controls}
+                <button class="event__save-btn  btn  btn--blue" type="submit"
+                  ${isDisabled ? 'disabled' : ''}>
+                    ${isSaving ? 'Saving...' : 'Save'}
+                </button>
+                  ${controls}
               </header>
               <section class="event__details">
                 ${offersTemplate}
@@ -194,13 +214,18 @@ export default class FormView extends AbstractStatefulView {
   #datepickerFrom = null;
   #datepickerTo = null;
 
+  #isNewEvent = false;
+
+  #saveButtonElement = null;
+
   constructor({
     event = EMPTY_EVENT,
     offersModel,
     destinationsModel,
     onFormSubmit,
     onFormReset,
-    onResetButtonClick = null,
+    onDelete = null,
+    isNewEvent = false,
   }) {
     super();
     this.#offersModel = offersModel;
@@ -219,7 +244,8 @@ export default class FormView extends AbstractStatefulView {
     );
     this.#handleFormSubmit = onFormSubmit;
     this.#handleFormReset = onFormReset;
-    this.#handleResetButton = onResetButtonClick ?? this.#handleFormReset;
+    this.#handleResetButton = onDelete ?? this.#handleFormReset;
+    this.#isNewEvent = isNewEvent;
     this._restoreHandlers();
   }
 
@@ -237,13 +263,15 @@ export default class FormView extends AbstractStatefulView {
   }
 
   _restoreHandlers() {
+    this.#saveButtonElement = this.element.querySelector('.event__save-btn');
+    this.#saveButtonElement.disabled = !this.#isSavingAvailable();
     this.element
       .querySelector('form')
       .addEventListener('submit', this.#formSubmitHandler);
     this.element
       .querySelector('.event__reset-btn')
       .addEventListener('click', this.#resetBtnClickHandler);
-    if (this._state.id) {
+    if (!this.#isNewEvent) {
       this.element
         .querySelector('.event__rollup-btn')
         .addEventListener('click', this.#closeBtnClickHandler);
@@ -269,17 +297,24 @@ export default class FormView extends AbstractStatefulView {
     return createFormTemplate({
       event: this._state,
       destinationsNames: this.#destinationsNames,
+      isNewEvent: this.#isNewEvent,
     });
   }
 
   static parseEventToState({ event, offers, destinations }) {
     const state = { ...event };
     state.typeOffers = new Map(offers.get(state.type));
-    state.offersSelection = getChosenItemsMap(
-      Array.from(state.typeOffers.keys()),
-      state.offers
-    );
-    state.destinationInfo = state.destination ? destinations.get(state.destination) : {};
+    state.offersSelection = state.offers.length
+      ? getChosenItemsMap(Array.from(state.typeOffers.keys()), state.offers)
+      : new Map();
+    state.destinationInfo = state.destination
+      ? destinations.get(state.destination)
+      : null;
+    state.destinationName = state.destinationInfo ? state.destinationInfo.name : null;
+
+    state.isSaving = false;
+    state.isDeleting = false;
+    state.isDisabled = false;
 
     return state;
   }
@@ -294,9 +329,14 @@ export default class FormView extends AbstractStatefulView {
       }
     });
     event.basePrice = Number(event.basePrice);
+
     delete event.typeOffers;
     delete event.offersSelection;
     delete event.destinationInfo;
+    delete event.destinationName;
+    delete event.isSaving;
+    delete event.isDeleting;
+    delete event.isDisabled;
 
     return event;
   }
@@ -326,18 +366,20 @@ export default class FormView extends AbstractStatefulView {
     this.#handleFormReset();
   };
 
+  #isSavingAvailable() {
+    return this._state.destinationInfo &&
+        Number(this._state.basePrice) &&
+        this._state.dateFrom &&
+        this._state.dateTo;
+  }
+
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
-    if (
-      !this.#destinationsNames.has(evt.target.value) ||
-      evt.target.value === this._state.destinationInfo.name
-    ) {
-      return;
-    }
     this.updateElement({
-      destinationInfo: this.#destinations.get(
-        this.#destinationsNames.get(evt.target.value)
-      ),
+      destinationName: evt.target.value,
+      destinationInfo: this.#destinationsNames.has(evt.target.value)
+        ? this.#destinations.get(this.#destinationsNames.get(evt.target.value))
+        : null,
     });
   };
 
@@ -357,7 +399,10 @@ export default class FormView extends AbstractStatefulView {
 
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
-    this._setState({ basePrice: evt.target.value });
+    this._setState({
+      basePrice: evt.target.value,
+    });
+    this.#saveButtonElement.disabled = !this.#isSavingAvailable();
   };
 
   #offerClickHandler = (evt) => {
@@ -384,11 +429,9 @@ export default class FormView extends AbstractStatefulView {
         defaultDate: this._state.dateFrom,
         maxDate: this._state.dateTo ?? null,
         onClose: ([date]) => {
-          if (!date) {
-            return;
-          }
-          this._setState({ dateFrom: date });
-          this.#datepickerTo.config.minDate = date;
+          this._setState({ dateFrom: date ?? null });
+          this.#datepickerTo.config.minDate = date ?? null;
+          this.#saveButtonElement.disabled = !this.#isSavingAvailable();
         },
       }
     );
@@ -399,11 +442,9 @@ export default class FormView extends AbstractStatefulView {
         defaultDate: this._state.dateTo,
         minDate: this._state.dateFrom ?? null,
         onClose: ([date]) => {
-          if (!date) {
-            return;
-          }
-          this._setState({ dateTo: date });
-          this.#datepickerFrom.config.maxDate = date;
+          this._setState({ dateTo: date ?? null });
+          this.#datepickerFrom.config.maxDate = date ?? null;
+          this.#saveButtonElement.disabled = !this.#isSavingAvailable();
         },
       }
     );

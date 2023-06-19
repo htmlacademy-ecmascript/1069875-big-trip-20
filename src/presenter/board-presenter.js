@@ -4,12 +4,14 @@ import SortingView from '../view/sorting-view.js';
 import EventPresenter from './event-presenter.js';
 import NewEventPresenter from './new-event-presenter.js';
 import { render, remove } from '../framework/render.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import {
   SortingNames,
   FiltersNames,
   UpdateType,
   UserAction,
   NoEventsMessages,
+  UiBlockerTimeLimits,
 } from '../const.js';
 import { filtersFunctions, sortByTime, sortByPrice } from '../utils.js';
 
@@ -40,6 +42,11 @@ export default class BoardPresenter {
   #handleOnReady = null;
 
   #showingEventsNumber = 0;
+
+  #uiBlocker = new UiBlocker({
+    lowerLimit: UiBlockerTimeLimits.LOWER_LIMIT,
+    upperLimit: UiBlockerTimeLimits.UPPER_LIMIT
+  });
 
   constructor({
     container,
@@ -189,18 +196,35 @@ export default class BoardPresenter {
     this.#eventsPresenters.forEach((presenter) => presenter.resetView());
   };
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = async (actionType, updateType, update) => {
+    this.#uiBlocker.block();
     switch (actionType) {
       case UserAction.UPDATE_EVENT:
-        this.#eventsModel.updateEvent(updateType, update);
+        this.#eventsPresenters.get(update.id).setSaving();
+        try {
+          await this.#eventsModel.updateEvent(updateType, update);
+        } catch (err) {
+          this.#eventsPresenters.get(update.id).setAbortion();
+        }
         break;
       case UserAction.ADD_EVENT:
-        this.#eventsModel.addEvent(updateType, update);
+        this.#newEventPresenter.setSaving();
+        try {
+          await this.#eventsModel.addEvent(updateType, update);
+        } catch (err) {
+          this.#newEventPresenter.get(update.id).setAbortion();
+        }
         break;
       case UserAction.DELETE_EVENT:
-        this.#eventsModel.removeEvent(updateType, update);
+        this.#eventsPresenters.get(update.id).setDeleting();
+        try {
+          await this.#eventsModel.removeEvent(updateType, update);
+        } catch (err) {
+          this.#eventsPresenters.get(update.id).setAbortion();
+        }
         break;
     }
+    this.#uiBlocker.unblock();
   };
 
   #handleModelEvent = (updateType, update) => {
@@ -218,7 +242,11 @@ export default class BoardPresenter {
         break;
       case UpdateType.INIT:
         this.#isReady = { ...this.#isReady, ...update };
-        if (!Array.from(Object.values(this.#isReady)).every((value) => value)) {
+        if (
+          !this.#isReady.destinations ||
+          !this.#isReady.offers ||
+          !this.#isReady.events
+        ) {
           return;
         }
         this.#isLoading = false;
