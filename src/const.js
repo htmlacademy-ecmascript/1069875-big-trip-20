@@ -39,6 +39,7 @@ const DateFormats = {
   FULL: 'YYYY-MM-DDTHH:mm',
   DAY_MACHINE: 'YYYY-MM-DD',
   DAY_HUMAN: 'MMM D',
+  DAY: 'D',
   TIME: 'hh:mm',
   FLATPICKR: 'd/m/y H:i',
 };

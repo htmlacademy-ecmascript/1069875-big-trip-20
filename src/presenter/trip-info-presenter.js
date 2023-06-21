@@ -134,7 +134,7 @@ export default class TripInfoPresenter {
       if (!isDatesEqual(dates[0].dateFrom, dates[0].dateTo)) {
         result.end = dates[0].dateTo;
       }
-      return;
+      return result;
     }
 
     if (isDatesEqual(dates[0].dateFrom, dates.at(-1).dateTo)) {

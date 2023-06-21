@@ -6,9 +6,18 @@ function createTitle(destinations) {
   return `${destinations.start}${destinations.middle ? ` &mdash; ${destinations.middle}` : ''}${destinations.end ? ` &mdash; ${destinations.end}` : ''}`;
 }
 
+function createDates(dates) {
+  const startDate = dayjs(dates.start).format(DateFormats.DAY_HUMAN);
+  if (!dates.end) {
+    return startDate;
+  }
+  const endDate = !dayjs(dates.end).isSame(dates.start, 'month') ? `&nbsp;&mdash;&nbsp;${dayjs(dates.end).format(DateFormats.DAY_HUMAN)}` : `&nbsp;&mdash;&nbsp;${dayjs(dates.end).format(DateFormats.DAY)}`;
+  return startDate + endDate;
+}
+
 function createTripInfoTemplate({ destinations, cost, dates }) {
   const title = destinations ? createTitle(destinations) : '...';
-  const tripDates = `${dates ? dayjs(dates.start).format(DateFormats.DAY_HUMAN) : '...'}${dates && dates.end ? `&nbsp;&mdash;&nbsp;${dayjs(dates.end).format(DateFormats.DAY_HUMAN)}` : ''}`;
+  const tripDates = dates ? createDates(dates) : '...';
   return `<section class="trip-main__trip-info  trip-info">
             <div class="trip-info__main">
               <h1 class="trip-info__title">
