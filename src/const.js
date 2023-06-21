@@ -27,6 +27,7 @@ const EVENT_ITEMS = ['day', 'event', 'time', 'price', 'offers'];
 
 const NoEventsMessages = {
   LOADING: 'Loading...',
+  ERROR: 'Couldn\'t download data',
   [FiltersNames.ALL]: 'Click New Event to create your first point',
   [FiltersNames.FUTURE]: 'There are no future events now',
   [FiltersNames.PRESENT]: 'There are no present events now',

@@ -1,5 +1,4 @@
-import { DurationFormats, FiltersNames, ERROR_TIME_SHOWING } from './const.js';
-import './error-style.css';
+import { DurationFormats, FiltersNames } from './const.js';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
@@ -95,14 +94,6 @@ function getChosenItemsMap(items, chosenItems = []) {
   return map;
 }
 
-const showError = () => {
-  const element = document.createElement('div');
-  element.className = 'default__error';
-  element.textContent = 'Couldn\'t download data';
-  document.body.append(element);
-  setTimeout(() => element.remove(), ERROR_TIME_SHOWING);
-};
-
 export {
   transformDate,
   isDatesEqual,
@@ -114,5 +105,4 @@ export {
   sortByPrice,
   sortByDate,
   getChosenItemsMap,
-  showError,
 };
