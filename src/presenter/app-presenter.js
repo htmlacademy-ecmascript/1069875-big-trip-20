@@ -9,8 +9,9 @@ import NewEventButtonView from '../view/new-event-button-view.js';
 import TripInfoPresenter from './trip-info-presenter.js';
 import FiltersPresenter from './filters-presenter.js';
 import BoardPresenter from './board-presenter.js';
-import { render } from '../framework/render.js';
-import { showError } from '../utils.js';
+import ErrorMessageView from '../view/error/error-message-view.js';
+import { render, remove, RenderPosition } from '../framework/render.js';
+import { ERROR_TIME_SHOWING, NoEventsMessages } from '../const.js';
 
 export default class AppPresenter {
   #tripMainElement = null;
@@ -69,8 +70,20 @@ export default class AppPresenter {
       ]);
       this.#eventsModel.init();
     } catch {
-      showError();
+      this.#showDataErrorMessage();
     }
+  }
+
+  #showDataErrorMessage() {
+    const errorMessageComponent = new ErrorMessageView({
+      message: NoEventsMessages.ERROR,
+    });
+    render(
+      errorMessageComponent,
+      this.#siteMainElement,
+      RenderPosition.AFTERBEGIN
+    );
+    setTimeout(() => remove(errorMessageComponent), ERROR_TIME_SHOWING);
   }
 
   #renderFilters() {

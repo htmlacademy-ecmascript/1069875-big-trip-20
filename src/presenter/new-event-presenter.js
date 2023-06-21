@@ -30,8 +30,8 @@ export default class NewEventPresenter {
 
   init() {
     this.#formComponent = new FormView({
-      offersModel: this.#offersModel,
-      destinationsModel: this.#destinationsModel,
+      offers: this.#offersModel.offers,
+      destinations: this.#destinationsModel.destinations,
       container: this.#container,
       onFormSubmit: this.#handleFormSubmit,
       onFormReset: () => this.destroy(),

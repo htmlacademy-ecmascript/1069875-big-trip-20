@@ -62,8 +62,8 @@ export default class EventPresenter {
 
     this.#formComponent = new FormView({
       event: this.#event,
-      offersModel: this.#offersModel,
-      destinationsModel: this.#destinationsModel,
+      offers: this.#offersModel.offers,
+      destinations: this.#destinationsModel.destinations,
       container: this.#container,
       onFormSubmit: this.#handleFormSubmit,
       onFormReset: this.#handleFormReset,
@@ -91,6 +91,7 @@ export default class EventPresenter {
   destroy() {
     remove(this.#eventComponent);
     remove(this.#formComponent);
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
   resetView() {
@@ -175,6 +176,7 @@ export default class EventPresenter {
       isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       changedEvent
     );
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
   #handleEventDelete = () => {
