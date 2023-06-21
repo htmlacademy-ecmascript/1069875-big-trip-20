@@ -91,6 +91,7 @@ export default class EventPresenter {
   destroy() {
     remove(this.#eventComponent);
     remove(this.#formComponent);
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
   resetView() {
@@ -175,6 +176,7 @@ export default class EventPresenter {
       isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       changedEvent
     );
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
   #handleEventDelete = () => {
