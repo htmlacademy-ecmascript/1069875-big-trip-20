@@ -10,9 +10,9 @@ import flatpickr from 'flatpickr';
 
 import 'flatpickr/dist/flatpickr.min.css';
 
-function createTypesListItemTemplate(title) {
+function createTypesListItemTemplate({ title, isSelected }) {
   return `<div class="event__type-item">
-            <input id="event-type-${title}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${title}">
+            <input id="event-type-${title}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${title}" ${isSelected ? 'checked' : ''}>
             <label class="event__type-label  event__type-label--${title}" for="event-type-${title}-1">
               ${startStringWithCapital(title)}
             </label>
@@ -118,7 +118,7 @@ function createFormTemplate({ event, destinationsNames, isNewEvent }) {
   )})`;
 
   const typesListTemplate = EVENTS_TYPES.map((title) =>
-    createTypesListItemTemplate(title)
+    createTypesListItemTemplate({ title, isSelected: type === title })
   ).join('');
 
   const offersTemplate = typeOffers.size
@@ -288,7 +288,7 @@ export default class FormView extends AbstractStatefulView {
     if (this._state.typeOffers.size) {
       this.element
         .querySelector('.event__available-offers')
-        .addEventListener('change', this.#offerClickHandler);
+        .addEventListener('change', this.#offersChangeHandler);
     }
     this.element
       .querySelector('.event__input--price')
@@ -396,7 +396,7 @@ export default class FormView extends AbstractStatefulView {
     this.#saveButtonElement.disabled = !this.#isSavingAvailable();
   };
 
-  #offerClickHandler = (evt) => {
+  #offersChangeHandler = (evt) => {
     evt.preventDefault();
     const offerId = evt.target.dataset.offerId;
     this._setState({

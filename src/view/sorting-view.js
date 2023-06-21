@@ -33,14 +33,14 @@ export default class SortingView extends AbstractView {
     this.#defaultSorting = defaultSorting;
     this.#handleSortingClick = onSortingClick;
     this.element
-      .addEventListener('click', this.#onSortingClickHandler);
+      .addEventListener('click', this.#sortingClickHandler);
   }
 
   get template() {
     return createSortingTemplate(this.#defaultSorting);
   }
 
-  #onSortingClickHandler = (evt) => {
+  #sortingClickHandler = (evt) => {
     if (!evt.target.dataset.sortType) {
       return;
     }
