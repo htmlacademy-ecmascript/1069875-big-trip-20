@@ -200,9 +200,6 @@ function createFormTemplate({ event, destinationsNames, isNewEvent }) {
 }
 
 export default class FormView extends AbstractStatefulView {
-  #offersModel = null;
-  #destinationsModel = null;
-
   #offers = null;
   #destinations = null;
   #destinationsNames = null;
@@ -220,18 +217,16 @@ export default class FormView extends AbstractStatefulView {
 
   constructor({
     event = EMPTY_EVENT,
-    offersModel,
-    destinationsModel,
+    offers,
+    destinations,
     onFormSubmit,
     onFormReset,
     onDelete = null,
     isNewEvent = false,
   }) {
     super();
-    this.#offersModel = offersModel;
-    this.#offers = new Map(this.#offersModel.offers);
-    this.#destinationsModel = destinationsModel;
-    this.#destinations = new Map(this.#destinationsModel.destinations);
+    this.#offers = offers;
+    this.#destinations = destinations;
     this.#destinationsNames = new Map(
       Array.from(this.#destinations.values()).map(({ id, name }) => [name, id])
     );
