@@ -249,6 +249,14 @@ export default class FormView extends AbstractStatefulView {
     this._restoreHandlers();
   }
 
+  get template() {
+    return createFormTemplate({
+      event: this._state,
+      destinationsNames: this.#destinationsNames,
+      isNewEvent: this.#isNewEvent,
+    });
+  }
+
   removeElement() {
     super.removeElement();
 
@@ -293,54 +301,6 @@ export default class FormView extends AbstractStatefulView {
     this.#setDatepickers();
   }
 
-  get template() {
-    return createFormTemplate({
-      event: this._state,
-      destinationsNames: this.#destinationsNames,
-      isNewEvent: this.#isNewEvent,
-    });
-  }
-
-  static parseEventToState({ event, offers, destinations }) {
-    const state = { ...event };
-    state.typeOffers = new Map(offers.get(state.type));
-    state.offersSelection = state.offers.length
-      ? getChosenItemsMap(Array.from(state.typeOffers.keys()), state.offers)
-      : new Map();
-    state.destinationInfo = state.destination
-      ? destinations.get(state.destination)
-      : null;
-    state.destinationName = state.destinationInfo ? state.destinationInfo.name : null;
-
-    state.isSaving = false;
-    state.isDeleting = false;
-    state.isDisabled = false;
-
-    return state;
-  }
-
-  static parseStateToEvent(state) {
-    const event = { ...state };
-    event.destination = event.destinationInfo.id;
-    event.offers = [];
-    event.offersSelection.forEach((value, id) => {
-      if (value) {
-        event.offers.push(id);
-      }
-    });
-    event.basePrice = Number(event.basePrice);
-
-    delete event.typeOffers;
-    delete event.offersSelection;
-    delete event.destinationInfo;
-    delete event.destinationName;
-    delete event.isSaving;
-    delete event.isDeleting;
-    delete event.isDisabled;
-
-    return event;
-  }
-
   reset(event) {
     this.updateElement(
       FormView.parseEventToState({
@@ -348,6 +308,49 @@ export default class FormView extends AbstractStatefulView {
         offers: this.#offers,
         destinations: this.#destinations,
       })
+    );
+  }
+
+  #isSavingAvailable() {
+    return (
+      this._state.destinationInfo &&
+      Number(this._state.basePrice) &&
+      this._state.dateFrom &&
+      this._state.dateTo
+    );
+  }
+
+  #setDatepickers() {
+    const config = {
+      dateFormat: DateFormats.FLATPICKR,
+      enableTime: true,
+      'time_24hr': true,
+    };
+    this.#datepickerFrom = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        ...config,
+        defaultDate: this._state.dateFrom,
+        maxDate: this._state.dateTo ?? null,
+        onClose: ([date]) => {
+          this._setState({ dateFrom: date ?? null });
+          this.#datepickerTo.config.minDate = date ?? null;
+          this.#saveButtonElement.disabled = !this.#isSavingAvailable();
+        },
+      }
+    );
+    this.#datepickerTo = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        ...config,
+        defaultDate: this._state.dateTo,
+        minDate: this._state.dateFrom ?? null,
+        onClose: ([date]) => {
+          this._setState({ dateTo: date ?? null });
+          this.#datepickerFrom.config.maxDate = date ?? null;
+          this.#saveButtonElement.disabled = !this.#isSavingAvailable();
+        },
+      }
     );
   }
 
@@ -365,13 +368,6 @@ export default class FormView extends AbstractStatefulView {
     evt.preventDefault();
     this.#handleFormReset();
   };
-
-  #isSavingAvailable() {
-    return this._state.destinationInfo &&
-        Number(this._state.basePrice) &&
-        this._state.dateFrom &&
-        this._state.dateTo;
-  }
 
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
@@ -416,37 +412,45 @@ export default class FormView extends AbstractStatefulView {
     });
   };
 
-  #setDatepickers() {
-    const config = {
-      dateFormat: DateFormats.FLATPICKR,
-      enableTime: true,
-      'time_24hr': true,
-    };
-    this.#datepickerFrom = flatpickr(
-      this.element.querySelector('#event-start-time-1'),
-      {
-        ...config,
-        defaultDate: this._state.dateFrom,
-        maxDate: this._state.dateTo ?? null,
-        onClose: ([date]) => {
-          this._setState({ dateFrom: date ?? null });
-          this.#datepickerTo.config.minDate = date ?? null;
-          this.#saveButtonElement.disabled = !this.#isSavingAvailable();
-        },
+  static parseEventToState({ event, offers, destinations }) {
+    const state = { ...event };
+    state.typeOffers = new Map(offers.get(state.type));
+    state.offersSelection = state.offers.length
+      ? getChosenItemsMap(Array.from(state.typeOffers.keys()), state.offers)
+      : new Map();
+    state.destinationInfo = state.destination
+      ? destinations.get(state.destination)
+      : null;
+    state.destinationName = state.destinationInfo
+      ? state.destinationInfo.name
+      : null;
+
+    state.isSaving = false;
+    state.isDeleting = false;
+    state.isDisabled = false;
+
+    return state;
+  }
+
+  static parseStateToEvent(state) {
+    const event = { ...state };
+    event.destination = event.destinationInfo.id;
+    event.offers = [];
+    event.offersSelection.forEach((value, id) => {
+      if (value) {
+        event.offers.push(id);
       }
-    );
-    this.#datepickerTo = flatpickr(
-      this.element.querySelector('#event-end-time-1'),
-      {
-        ...config,
-        defaultDate: this._state.dateTo,
-        minDate: this._state.dateFrom ?? null,
-        onClose: ([date]) => {
-          this._setState({ dateTo: date ?? null });
-          this.#datepickerFrom.config.maxDate = date ?? null;
-          this.#saveButtonElement.disabled = !this.#isSavingAvailable();
-        },
-      }
-    );
+    });
+    event.basePrice = Number(event.basePrice);
+
+    delete event.typeOffers;
+    delete event.offersSelection;
+    delete event.destinationInfo;
+    delete event.destinationName;
+    delete event.isSaving;
+    delete event.isDeleting;
+    delete event.isDisabled;
+
+    return event;
   }
 }

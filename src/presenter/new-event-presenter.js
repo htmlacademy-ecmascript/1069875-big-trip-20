@@ -29,9 +29,6 @@ export default class NewEventPresenter {
   }
 
   init() {
-    if (this.#formComponent) {
-      return;
-    }
     this.#formComponent = new FormView({
       offersModel: this.#offersModel,
       destinationsModel: this.#destinationsModel,

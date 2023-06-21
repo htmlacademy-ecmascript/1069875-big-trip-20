@@ -20,6 +20,13 @@ export default class FiltersPresenter {
     this.#eventsModel.addObserver(this.#handleModelEvent);
   }
 
+  get filters() {
+    return Object.entries(filtersFunctions).map(([name, filterFn]) => ({
+      name,
+      isActive: Boolean(filterFn(this.#eventsModel.events).length),
+    }));
+  }
+
   init() {
     const prevFiltersComponent = this.#filtersComponent;
 
@@ -36,13 +43,6 @@ export default class FiltersPresenter {
 
     replace(this.#filtersComponent, prevFiltersComponent);
     remove(prevFiltersComponent);
-  }
-
-  get filters() {
-    return Object.entries(filtersFunctions).map(([name, filterFn]) => ({
-      name,
-      isActive: Boolean(filterFn(this.#eventsModel.events).length),
-    }));
   }
 
   #handleModelEvent = () => {

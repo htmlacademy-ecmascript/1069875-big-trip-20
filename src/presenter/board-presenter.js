@@ -33,13 +33,9 @@ export default class BoardPresenter {
   #currentSorting = SortingNames.DAY;
 
   #isLoading = true;
-  #isReady = {
-    events: false,
-    destinations: false,
-    offers: false,
-  };
 
   #handleOnReady = null;
+  #onNewEventDestroyHandler = null;
 
   #showingEventsNumber = 0;
 
@@ -63,23 +59,13 @@ export default class BoardPresenter {
     this.#destinationsModel = destinationsModel;
     this.#filterModel = filterModel;
 
-    this.#newEventPresenter = new NewEventPresenter({
-      container: this.#eventsListComponent.element,
-      offersModel: this.#offersModel,
-      destinationsModel: this.#destinationsModel,
-      onDataChange: this.#handleViewAction,
-      onDestroy: onNewEventDestroy,
-    });
+    this.#onNewEventDestroyHandler = onNewEventDestroy;
     this.#handleOnReady = onReady;
 
     this.#eventsModel.addObserver(this.#handleModelEvent);
     this.#offersModel.addObserver(this.#handleModelEvent);
     this.#destinationsModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
-  }
-
-  init() {
-    this.#renderBoard();
   }
 
   get events() {
@@ -95,6 +81,10 @@ export default class BoardPresenter {
     }
 
     return filteredEvents;
+  }
+
+  init() {
+    this.#renderBoard();
   }
 
   #renderBoard() {
@@ -154,7 +144,9 @@ export default class BoardPresenter {
   }
 
   #clearEventsList() {
-    this.#newEventPresenter.destroy();
+    if (this.#newEventPresenter) {
+      this.#newEventPresenter.destroy();
+    }
     this.#eventsPresenters.forEach((presenter) => presenter.destroy());
     this.#eventsPresenters.clear();
   }
@@ -179,8 +171,31 @@ export default class BoardPresenter {
   createEvent() {
     this.#currentSorting = SortingNames.DAY;
     this.#filterModel.setFilter(UpdateType.MAJOR, FiltersNames.ALL);
+    if (this.#noEventsComponent) {
+      remove(this.#noEventsComponent);
+      this.#noEventsComponent = null;
+      this.#renderEventsList();
+    }
+    this.#newEventPresenter = new NewEventPresenter({
+      container: this.#eventsListComponent.element,
+      offersModel: this.#offersModel,
+      destinationsModel: this.#destinationsModel,
+      onDataChange: this.#handleViewAction,
+      onDestroy: this.#handleNewEventDestroy,
+    });
     this.#newEventPresenter.init();
   }
+
+  #handleNewEventDestroy = () => {
+    if (!this.events.length) {
+      remove(this.#eventsListComponent);
+      this.#renderNoEvents({
+        message: NoEventsMessages[this.#filterModel.filter],
+      });
+    }
+    this.#onNewEventDestroyHandler();
+    this.#newEventPresenter = null;
+  };
 
   #handleSortingClick = (sortType) => {
     if (sortType === this.#currentSorting) {
@@ -192,7 +207,9 @@ export default class BoardPresenter {
   };
 
   #handleModeChange = () => {
-    this.#newEventPresenter.destroy();
+    if (this.#newEventPresenter) {
+      this.#newEventPresenter.destroy();
+    }
     this.#eventsPresenters.forEach((presenter) => presenter.resetView());
   };
 
@@ -241,14 +258,6 @@ export default class BoardPresenter {
         this.#renderBoard();
         break;
       case UpdateType.INIT:
-        this.#isReady = { ...this.#isReady, ...update };
-        if (
-          !this.#isReady.destinations ||
-          !this.#isReady.offers ||
-          !this.#isReady.events
-        ) {
-          return;
-        }
         this.#isLoading = false;
         this.#clearBoard();
         this.#renderBoard();

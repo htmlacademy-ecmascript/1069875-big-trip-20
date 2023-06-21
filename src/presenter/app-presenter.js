@@ -5,17 +5,19 @@ import EventsModel from '../model/events-model.js';
 import OffersModel from '../model/offers-model.js';
 import DestinationsModel from '../model/destinations-model.js';
 import FilterModel from '../model/filter-model.js';
-import TripInfoView from '../view/trip-info-view.js';
 import NewEventButtonView from '../view/new-event-button-view.js';
+import TripInfoPresenter from './trip-info-presenter.js';
 import FiltersPresenter from './filters-presenter.js';
 import BoardPresenter from './board-presenter.js';
-import { render, RenderPosition } from '../framework/render.js';
+import { render } from '../framework/render.js';
+import { showError } from '../utils.js';
 
 export default class AppPresenter {
   #tripMainElement = null;
   #filtersElement = null;
   #siteMainElement = null;
 
+  #tripInfoPresenter = null;
   #filtersPresenter = null;
   #boardPresenter = null;
   #newEventButtonComponent = null;
@@ -44,23 +46,31 @@ export default class AppPresenter {
     this.#destinationsModel = new DestinationsModel({
       apiService: new DestinationsApiService(endPoint, authorization),
     });
+    this.#tripInfoPresenter = new TripInfoPresenter({
+      container: tripMainElement,
+      eventsModel: this.#eventsModel,
+      offersModel: this.#offersModel,
+      destinationsModel: this.#destinationsModel,
+    });
   }
 
   init() {
-    this.#eventsModel.init();
-    this.#offersModel.init();
-    this.#destinationsModel.init();
-    this.#renderTripInfo();
+    this.#tripInfoPresenter.init();
     this.#renderFilters();
     this.#renderBoard();
+    this.#initModels();
   }
 
-  #renderTripInfo() {
-    render(
-      new TripInfoView(),
-      this.#tripMainElement,
-      RenderPosition.AFTERBEGIN
-    );
+  async #initModels() {
+    try {
+      await Promise.all([
+        this.#offersModel.init(),
+        this.#destinationsModel.init(),
+      ]);
+      this.#eventsModel.init();
+    } catch {
+      showError();
+    }
   }
 
   #renderFilters() {

@@ -1,13 +1,18 @@
 import Observable from '../framework/observable.js';
 import { UpdateType } from '../const.js';
+import { sortByDate } from '../utils.js';
 
 export default class EventsModel extends Observable {
   #apiService = null;
-  #events = [];
+  #events = new Map();
 
   constructor({ apiService }) {
     super();
     this.#apiService = apiService;
+  }
+
+  get events() {
+    return Array.from(this.#events.values()).sort(sortByDate);
   }
 
   async init() {
@@ -19,11 +24,7 @@ export default class EventsModel extends Observable {
     } catch (err) {
       this.#events = new Map();
     }
-    this._notify(UpdateType.INIT, { events: true });
-  }
-
-  get events() {
-    return Array.from(this.#events.values());
+    this._notify(UpdateType.INIT);
   }
 
   async updateEvent(updateType, update) {
